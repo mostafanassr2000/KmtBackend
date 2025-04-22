@@ -1,0 +1,24 @@
+namespace KmtBackend.API.DTOs.User
+{
+    // Create user request
+    public class CreateUserRequest
+    {
+        // Username for login
+        public string Username { get; set; } = null!;
+        
+        // Email for communication
+        public string Email { get; set; } = null!;
+        
+        // Password (will be hashed)
+        public string Password { get; set; } = null!;
+        
+        // User role (Admin/User)
+        public string Role { get; set; } = "User";
+        
+        // Job title
+        public string? Title { get; set; }
+        
+        // Department ID
+        public int? DepartmentId { get; set; }
+    }
+}
