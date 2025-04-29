@@ -1,6 +1,7 @@
 using KmtBackend.API.DTOs.User;
 // User DTOs
-using KmtBackend.API.Services.Interfaces;
+using KmtBackend.BLL.Managers.Interfaces;
+
 // Service interfaces
 using Microsoft.AspNetCore.Authorization;
 // Authorization attributes
@@ -18,10 +19,10 @@ namespace KmtBackend.API.Controllers
     public class UserController : ControllerBase
     {
         // User service for business logic
-        private readonly IUserService _userService;
+        private readonly IUserManager _userService;
 
         // Constructor with DI
-        public UserController(IUserService userService)
+        public UserController(IUserManager userService)
         {
             // Store service reference
             _userService = userService;

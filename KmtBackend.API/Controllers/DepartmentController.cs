@@ -1,6 +1,7 @@
 using KmtBackend.API.DTOs.Department;
 // Department DTOs
-using KmtBackend.API.Services.Interfaces;
+using KmtBackend.BLL.Managers.Interfaces;
+
 // Service interfaces
 using Microsoft.AspNetCore.Authorization;
 // Authorization attributes
@@ -17,10 +18,10 @@ namespace KmtBackend.API.Controllers
     public class DepartmentController : ControllerBase
     {
         // Department service for business logic
-        private readonly IDepartmentService _departmentService;
+        private readonly IDepartmentManager _departmentService;
 
         // Constructor with DI
-        public DepartmentController(IDepartmentService departmentService)
+        public DepartmentController(IDepartmentManager departmentService)
         {
             // Store service reference
             _departmentService = departmentService;

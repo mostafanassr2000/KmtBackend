@@ -1,6 +1,6 @@
 using KmtBackend.DAL.Entities;
 
-namespace KmtBackend.API.Infrastructure.Auth
+namespace KmtBackend.Infrastructure.TokenGenerator
 {
     // Interface for token generation service
     public interface IJwtTokenGenerator

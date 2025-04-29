@@ -1,18 +1,16 @@
-using KmtBackend.API.Infrastructure.Auth;
 using KmtBackend.API.Mapping;
-using KmtBackend.API.Services;
-using KmtBackend.API.Services.Interfaces;
+using KmtBackend.API.Middlewares;
+using KmtBackend.API.ServicesExtension;
 using KmtBackend.DAL.Context;
-using KmtBackend.DAL.Repositories;
-using KmtBackend.DAL.Repositories.Interfaces;
-using KmtBackend.Infrastructure.Auth;
-using KmtBackend.Infrastructure.Localization;
+using KmtBackend.Infrastructure.TokenGenerator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+
+  
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -24,21 +22,21 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    .AddJwtBearer(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? "fallbackSecretKeyForDevelopmentOnly")),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? "fallbackSecretKeyForDevelopmentOnly")),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -54,29 +52,25 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+c.AddSecurityRequirement(new OpenApiSecurityRequirement
+{
     {
+        new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
+            Reference = new OpenApiReference
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+        Array.Empty<string>()
+    }
+});
 });
 
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-
+builder.Services.RegisterManagers();
+builder.Services.RegisterRepositories();
+builder.Services.RegisterServices();
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
@@ -91,7 +85,6 @@ builder.Services.AddDbContext<KmtDbContext>(options =>
 
 builder.Services.AddMappings();
 
-
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddHttpContextAccessor();
@@ -101,8 +94,8 @@ var app = builder.Build();
 app.UseCors(options =>
 {
     options.AllowAnyOrigin()
-           .AllowAnyHeader()
-           .AllowAnyMethod();
+    .AllowAnyHeader()
+    .AllowAnyMethod();
 });
 
 if (app.Environment.IsDevelopment())
@@ -120,5 +113,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await KmtBackend.DAL.Seed.DatabaseSeeder.SeedDatabaseAsync(app.Services);
 
 app.Run();

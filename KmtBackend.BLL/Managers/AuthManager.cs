@@ -1,74 +1,59 @@
 using KmtBackend.API.DTOs.Auth;
-// Authentication DTOs
-using KmtBackend.API.Infrastructure.Auth;
-// JWT token generation
-using KmtBackend.API.Services.Interfaces;
-// Service interfaces
 using KmtBackend.DAL.Repositories.Interfaces;
-// Repository interfaces
 using MapsterMapper;
-// Object mapping
 using Microsoft.IdentityModel.Tokens;
-// Token validation
-using System;
-// General utilities
 using System.IdentityModel.Tokens.Jwt;
-// JWT handling
 using System.Text;
-// Text encoding
-using System.Threading.Tasks;
-// Async operations
 using Microsoft.Extensions.Options;
-using KmtBackend.Infrastructure.Auth;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Tls.Crypto.Impl.BC;
-// Options pattern
+using KmtBackend.BLL.Managers.Interfaces;
+using KmtBackend.Infrastructure.TokenGenerator;
+using Microsoft.AspNetCore.Identity;
+using KmtBackend.DAL.Entities;
 
-namespace KmtBackend.API.Services
+namespace KmtBackend.BLL.Managers
 {
-    // Authentication service implementation
-    public class AuthService : IAuthService
+    public class AuthManager : IAuthManager
     {
-        // User repository for data access
         private readonly IUserRepository _userRepository;
-        // JWT token generator
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        // Object mapper
         private readonly IMapper _mapper;
-        // JWT settings
         private readonly JwtSettings _jwtSettings;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-        // Constructor with dependencies
-        public AuthService(
+        public AuthManager(
             IUserRepository userRepository,
             IJwtTokenGenerator jwtTokenGenerator,
             IMapper mapper,
             IOptions<JwtSettings> jwtSettings)
         {
-            // Initialize dependencies
             _userRepository = userRepository;
             _jwtTokenGenerator = jwtTokenGenerator;
             _mapper = mapper;
             _jwtSettings = jwtSettings.Value;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
-        // Login implementation
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            // Find user by email
             var user = await _userRepository.GetByEmailAsync(request.Email);
-            
-            // Check if user exists and password matches
-            if (user == null || user.PasswordHash == "BCrypt.Generate(request.Password, new byte { 10 }, 1)")
+
+            if (user == null)
             {
-                // Authentication failed
                 throw new Exception("Invalid credentials");
             }
 
-            // Generate JWT token
+            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                request.Password);
+
+            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Invalid credentials");
+            }
+
             var token = _jwtTokenGenerator.GenerateToken(user);
 
-            // Create and return response
             return new LoginResponse
             {
                 Token = token,
@@ -76,17 +61,13 @@ namespace KmtBackend.API.Services
             };
         }
 
-        // Token validation
         public Task<bool> ValidateTokenAsync(string token)
         {
-            // Token handler for validation
             var tokenHandler = new JwtSecurityTokenHandler();
-            // Our security key
             var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
 
             try
             {
-                // Token validation parameters
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -99,12 +80,10 @@ namespace KmtBackend.API.Services
                     ClockSkew = TimeSpan.Zero
                 }, out _);
 
-                // Token is valid
                 return Task.FromResult(true);
             }
             catch
             {
-                // Token validation failed
                 return Task.FromResult(false);
             }
         }

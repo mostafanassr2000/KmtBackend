@@ -19,8 +19,8 @@ namespace KmtBackend.DAL.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Apply all configurations from assembly
-            modelBuilder
-                .ApplyConfigurationsFromAssembly(typeof(KmtDbContext).Assembly);
+            //modelBuilder
+            //    .ApplyConfigurationsFromAssembly(typeof(KmtDbContext).Assembly);
 
             // User email must be unique
             modelBuilder.Entity<User>()
