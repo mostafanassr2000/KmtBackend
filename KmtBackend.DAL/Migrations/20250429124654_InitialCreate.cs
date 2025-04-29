@@ -86,25 +86,23 @@ namespace KmtBackend.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RolePermissions",
+                name: "PermissionRole",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    PermissionsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePermissions", x => x.Id);
+                    table.PrimaryKey("PK_PermissionRole", x => new { x.PermissionsId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_RolePermissions_Permissions_PermissionId",
-                        column: x => x.PermissionId,
+                        name: "FK_PermissionRole_Permissions_PermissionsId",
+                        column: x => x.PermissionsId,
                         principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RolePermissions_Roles_RoleId",
+                        name: "FK_PermissionRole_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id",
@@ -112,25 +110,23 @@ namespace KmtBackend.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "RoleUser",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    RolesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.PrimaryKey("PK_RoleUser", x => new { x.RolesId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RoleId",
-                        column: x => x.RoleId,
+                        name: "FK_RoleUser_Roles_RolesId",
+                        column: x => x.RolesId,
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId",
+                        name: "FK_RoleUser_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -138,20 +134,14 @@ namespace KmtBackend.DAL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_PermissionRole_RoleId",
+                table: "PermissionRole",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Code",
                 table: "Permissions",
                 column: "Code",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolePermissions_PermissionId",
-                table: "RolePermissions",
-                column: "PermissionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolePermissions_RoleId_PermissionId",
-                table: "RolePermissions",
-                columns: new[] { "RoleId", "PermissionId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -161,15 +151,9 @@ namespace KmtBackend.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId",
-                table: "UserRoles",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId_RoleId",
-                table: "UserRoles",
-                columns: new[] { "UserId", "RoleId" },
-                unique: true);
+                name: "IX_RoleUser_UserId",
+                table: "RoleUser",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_DepartmentId",
@@ -187,10 +171,10 @@ namespace KmtBackend.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RolePermissions");
+                name: "PermissionRole");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "RoleUser");
 
             migrationBuilder.DropTable(
                 name: "Permissions");

@@ -40,12 +40,9 @@ namespace KmtBackend.DAL.Repositories
             return await _context.Users
                 .Where(u => u.Email.ToLower() == email.ToLower())
                 // Include user roles and role information
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                    .ThenInclude(r => r.RolePermissions)
-                    .ThenInclude(rp => rp.Permission)
+                .Include(u => u.Roles)
+                .ThenInclude(rp => rp.Permissions)
                 .Include(u => u.Department)
-                .AsSplitQuery()
                 .FirstOrDefaultAsync();
         }
 

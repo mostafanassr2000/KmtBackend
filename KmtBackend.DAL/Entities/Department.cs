@@ -17,7 +17,7 @@ namespace KmtBackend.DAL.Entities
         [MaxLength(500)]
         public string? Description { get; set; }
         
-        public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
+        public virtual ICollection<User> Users { get; set; } = [];
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

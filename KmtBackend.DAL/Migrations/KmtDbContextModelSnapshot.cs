@@ -123,31 +123,6 @@ namespace KmtBackend.DAL.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("KmtBackend.DAL.Entities.RolePermission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PermissionId");
-
-                    b.HasIndex("RoleId", "PermissionId")
-                        .IsUnique();
-
-                    b.ToTable("RolePermissions");
-                });
-
             modelBuilder.Entity("KmtBackend.DAL.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -195,48 +170,34 @@ namespace KmtBackend.DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("KmtBackend.DAL.Entities.UserRole", b =>
+            modelBuilder.Entity("PermissionRole", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("PermissionsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PermissionsId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("PermissionRole");
+                });
+
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.Property<Guid>("RolesId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("RolesId", "UserId");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("UserId", "RoleId")
-                        .IsUnique();
-
-                    b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("KmtBackend.DAL.Entities.RolePermission", b =>
-                {
-                    b.HasOne("KmtBackend.DAL.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KmtBackend.DAL.Entities.Role", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
+                    b.ToTable("RoleUser");
                 });
 
             modelBuilder.Entity("KmtBackend.DAL.Entities.User", b =>
@@ -249,45 +210,39 @@ namespace KmtBackend.DAL.Migrations
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("KmtBackend.DAL.Entities.UserRole", b =>
+            modelBuilder.Entity("PermissionRole", b =>
                 {
-                    b.HasOne("KmtBackend.DAL.Entities.Role", "Role")
-                        .WithMany("UserRoles")
+                    b.HasOne("KmtBackend.DAL.Entities.Permission", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KmtBackend.DAL.Entities.Role", null)
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.HasOne("KmtBackend.DAL.Entities.User", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.HasOne("KmtBackend.DAL.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
+                    b.HasOne("KmtBackend.DAL.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("KmtBackend.DAL.Entities.Department", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("KmtBackend.DAL.Entities.Permission", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("KmtBackend.DAL.Entities.Role", b =>
-                {
-                    b.Navigation("RolePermissions");
-
-                    b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("KmtBackend.DAL.Entities.User", b =>
-                {
-                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

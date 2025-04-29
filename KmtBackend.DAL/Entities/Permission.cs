@@ -33,7 +33,7 @@ namespace KmtBackend.DAL.Entities
         /// <summary>
         /// Collection of roles that have this permission
         /// </summary>
-        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new HashSet<RolePermission>();
+        public virtual ICollection<Role> Role { get; set; } = [];
         
         /// <summary>
         /// Creation timestamp

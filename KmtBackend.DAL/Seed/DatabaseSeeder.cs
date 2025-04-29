@@ -132,17 +132,7 @@ namespace KmtBackend.DAL.Seed
                 // Assign all permissions to admin role
                 foreach (var permission in allPermissions)
                 {
-                    // Create role-permission relationship
-                    var rolePermission = new RolePermission
-                    {
-                        Id = Guid.NewGuid(),
-                        RoleId = adminRole.Id,
-                        PermissionId = permission.Id,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    // Add to context
-                    await context.RolePermissions.AddAsync(rolePermission);
+                    adminRole.Permissions.Add(permission);
                 }
 
                 // Save all role permissions
@@ -156,42 +146,18 @@ namespace KmtBackend.DAL.Seed
                 // Log that admin role already exists
                 logger.LogInformation("Super Admin role already exists");
 
-                // Get all permissions
-                var allPermissionIds = await context.Permissions
-                    .Select(p => p.Id)
-                    .ToListAsync();
-
-                // Get current admin role permissions
-                var currentPermissionIds = await context.RolePermissions
-                    .Where(rp => rp.RoleId == adminRole.Id)
-                    .Select(rp => rp.PermissionId)
-                    .ToListAsync();
-
-                // Find permissions not assigned to admin role
-                var missingPermissionIds = allPermissionIds
-                    .Except(currentPermissionIds)
-                    .ToList();
+                var missingPermissions = await context.Permissions.Except(adminRole.Permissions).ToListAsync();
 
                 // Assign any missing permissions
-                if (missingPermissionIds.Any())
+                if (missingPermissions.Any())
                 {
                     // Log missing permissions being added
-                    logger.LogInformation("Adding {Count} missing permissions to Super Admin role", missingPermissionIds.Count);
+                    logger.LogInformation("Adding {Count} missing permissions to Super Admin role", missingPermissions.Count);
 
                     // Create role-permission relationships for missing permissions
-                    foreach (var permissionId in missingPermissionIds)
+                    foreach (var missingPermission in missingPermissions)
                     {
-                        // Create new relationship
-                        var rolePermission = new RolePermission
-                        {
-                            Id = Guid.NewGuid(),
-                            RoleId = adminRole.Id,
-                            PermissionId = permissionId,
-                            CreatedAt = DateTime.UtcNow
-                        };
-
-                        // Add to context
-                        await context.RolePermissions.AddAsync(rolePermission);
+                        adminRole.Permissions.Add(missingPermission);
                     }
 
                     // Save changes
@@ -246,17 +212,8 @@ namespace KmtBackend.DAL.Seed
             // If admin role exists, assign it to the user
             if (adminRole != null)
             {
-                // Create user-role relationship
-                var userRole = new UserRole
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = superAdmin.Id,
-                    RoleId = adminRole.Id,
-                    CreatedAt = DateTime.UtcNow
-                };
+                superAdmin.Roles.Add(adminRole);
 
-                // Add to context
-                await context.UserRoles.AddAsync(userRole);
                 // Save changes
                 await context.SaveChangesAsync();
 

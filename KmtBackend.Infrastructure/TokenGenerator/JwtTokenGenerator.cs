@@ -32,20 +32,20 @@ namespace KmtBackend.Infrastructure.TokenGenerator
             };
 
             // Add role claims from user's assigned roles
-            if (user.UserRoles != null)
+            if (user.Roles != null)
             {
-                foreach (var userRole in user.UserRoles)
+                foreach (var userRole in user.Roles)
                 {
                     // Add role name as a role claim
-                    claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+                    claims.Add(new Claim(ClaimTypes.Role, userRole.Name));
 
                     // Add permissions as custom claims
-                    if (userRole.Role.RolePermissions != null)
+                    if (userRole.Permissions != null)
                     {
-                        foreach (var rolePermission in userRole.Role.RolePermissions)
+                        foreach (var permission in userRole.Permissions)
                         {
                             // Add permission code as custom claim
-                            claims.Add(new Claim("permission", rolePermission.Permission.Code));
+                            claims.Add(new Claim("permission", permission.Code));
                         }
                     }
                 }

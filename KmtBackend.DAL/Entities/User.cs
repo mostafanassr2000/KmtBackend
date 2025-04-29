@@ -1,3 +1,4 @@
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
 // Validation attributes for properties
 using System.ComponentModel.DataAnnotations.Schema;
@@ -44,7 +45,7 @@ namespace KmtBackend.DAL.Entities
         /// <summary>
         /// Collection of roles assigned to this user
         /// </summary>
-        public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+        public virtual ICollection<Role> Roles { get; set; } = [];
 
         // Foreign key to Department
         public Guid? DepartmentId { get; set; }

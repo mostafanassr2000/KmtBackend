@@ -40,12 +40,12 @@ namespace KmtBackend.DAL.Entities
         /// <summary>
         /// Collection of users assigned this role
         /// </summary>
-        public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+        public virtual ICollection<User> User { get; set; } = [];
         
         /// <summary>
         /// Collection of permissions assigned to this role
         /// </summary>
-        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new HashSet<RolePermission>();
+        public virtual ICollection<Permission> Permissions { get; set; } = [];
         
         /// <summary>
         /// Creation timestamp
