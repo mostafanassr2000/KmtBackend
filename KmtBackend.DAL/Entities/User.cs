@@ -10,7 +10,7 @@ namespace KmtBackend.DAL.Entities
     {
         // Primary key for the user
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Username for login purposes
         [Required]
@@ -30,14 +30,24 @@ namespace KmtBackend.DAL.Entities
         // Employee title or position
         [MaxLength(100)]
         public string? Title { get; set; }
-        
+
+        // Employee arabic title or position
+        [MaxLength(100)]
+        public string? TitleAr { get; set; }
+
         // Role for RBAC (Admin or User)
-        [Required]
-        [MaxLength(20)]
-        public string Role { get; set; } = "User";
-        
+
+        //[Required]
+        //[MaxLength(20)]
+        //public string Role { get; set; } = "User";
+
+        /// <summary>
+        /// Collection of roles assigned to this user
+        /// </summary>
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+
         // Foreign key to Department
-        public int? DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
         
         // Navigation property
         [ForeignKey("DepartmentId")]

@@ -26,7 +26,7 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Get user by ID with department info
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(Guid id)
         {
             // Query with included department
             return await _context.Users
@@ -60,7 +60,7 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Get users filtered by department
-        public async Task<IEnumerable<User>> GetByDepartmentAsync(int departmentId)
+        public async Task<IEnumerable<User>> GetByDepartmentAsync(Guid departmentId)
         {
             // Filter by department ID
             return await _context.Users
@@ -93,7 +93,7 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Delete user by ID
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             // Find user to delete
             var user = await _context.Users.FindAsync(id);

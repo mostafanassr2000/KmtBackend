@@ -16,6 +16,6 @@ namespace KmtBackend.API.DTOs.User
         public string? Title { get; set; }
         
         // Updated department
-        public int? DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
     }
 }

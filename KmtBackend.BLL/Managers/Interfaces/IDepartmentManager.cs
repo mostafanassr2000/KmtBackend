@@ -4,15 +4,15 @@ namespace KmtBackend.BLL.Managers.Interfaces
 {
     public interface IDepartmentManager
     {
-        Task<DepartmentResponse?> GetDepartmentByIdAsync(int id);
+        Task<DepartmentResponse?> GetDepartmentByIdAsync(Guid id);
         
         Task<IEnumerable<DepartmentResponse>> GetAllDepartmentsAsync();
         
         Task<DepartmentResponse> CreateDepartmentAsync(CreateDepartmentRequest request);
         
-        Task<DepartmentResponse> UpdateDepartmentAsync(int id, UpdateDepartmentRequest request);
+        Task<DepartmentResponse> UpdateDepartmentAsync(Guid id, UpdateDepartmentRequest request);
         
-        Task<bool> DeleteDepartmentAsync(int id);
+        Task<bool> DeleteDepartmentAsync(Guid id);
     }
 }
 

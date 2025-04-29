@@ -40,7 +40,7 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<UserResponse>(createdUser);
         }
 
-        public async Task<UserResponse?> GetUserByIdAsync(int id)
+        public async Task<UserResponse?> GetUserByIdAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             
@@ -56,7 +56,7 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<IEnumerable<UserResponse>>(users);
         }
 
-        public async Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest request)
+        public async Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
             var user = await _userRepository.GetByIdAsync(id);
             
@@ -92,7 +92,7 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<UserResponse>(updatedUser);
         }
 
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<bool> DeleteUserAsync(Guid id)
         {
             return await _userRepository.DeleteAsync(id);
         }

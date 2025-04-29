@@ -22,7 +22,7 @@ namespace KmtBackend.BLL.Managers
             _mapper = mapper;
         }
 
-        public async Task<DepartmentResponse?> GetDepartmentByIdAsync(int id)
+        public async Task<DepartmentResponse?> GetDepartmentByIdAsync(Guid id)
         {
             var department = await _departmentRepository.GetByIdAsync(id);
             
@@ -71,7 +71,7 @@ namespace KmtBackend.BLL.Managers
             return response;
         }
 
-        public async Task<DepartmentResponse> UpdateDepartmentAsync(int id, UpdateDepartmentRequest request)
+        public async Task<DepartmentResponse> UpdateDepartmentAsync(Guid id, UpdateDepartmentRequest request)
         {
             var department = await _departmentRepository.GetByIdAsync(id);
             
@@ -95,7 +95,7 @@ namespace KmtBackend.BLL.Managers
             return response;
         }
 
-        public async Task<bool> DeleteDepartmentAsync(int id)
+        public async Task<bool> DeleteDepartmentAsync(Guid id)
         {
             var users = await _userRepository.GetByDepartmentAsync(id);
             

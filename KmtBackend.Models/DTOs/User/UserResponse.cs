@@ -4,7 +4,7 @@ namespace KmtBackend.API.DTOs.User
     public class UserResponse
     {
         // User ID
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Username
         public string Username { get; set; } = null!;
@@ -32,7 +32,7 @@ namespace KmtBackend.API.DTOs.User
     public class DepartmentResponse
     {
         // Department ID
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Name (language specific)
         public string Name { get; set; } = null!;

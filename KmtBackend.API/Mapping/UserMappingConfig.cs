@@ -23,7 +23,7 @@ namespace KmtBackend.API.Mapping
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Username, src => src.Username)
                 .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.Role, src => src.Role)
+                //.Map(dest => dest.Role, src => src.Role)
                 .Map(dest => dest.Title, src => src.Title)
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
@@ -42,7 +42,7 @@ namespace KmtBackend.API.Mapping
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Username, src => src.Username)
                 .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.Role, src => src.Role)
+                //.Map(dest => dest.Role, src => src.Role)
                 .Map(dest => dest.Title, src => src.Title)
                 // Conditionally map department if exists
                 .Map(dest => dest.Department, src => src.Department == null ? null : new DepartmentDto
@@ -58,7 +58,7 @@ namespace KmtBackend.API.Mapping
             config.NewConfig<CreateUserRequest, User>()
                 .Map(dest => dest.Username, src => src.Username)
                 .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.Role, src => src.Role)
+                //.Map(dest => dest.Role, src => src.Role)
                 .Map(dest => dest.Title, src => src.Title)
                 .Map(dest => dest.DepartmentId, src => src.DepartmentId)
                 // Don't map password directly - it's handled in service

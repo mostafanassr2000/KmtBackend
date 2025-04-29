@@ -6,12 +6,12 @@ namespace KmtBackend.BLL.Managers.Interfaces
     {
         Task<UserResponse> CreateUserAsync(CreateUserRequest request);
         
-        Task<UserResponse?> GetUserByIdAsync(int id);
+        Task<UserResponse?> GetUserByIdAsync(Guid id);
         
         Task<IEnumerable<UserResponse>> GetAllUsersAsync();
         
-        Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest request);
+        Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request);
         
-        Task<bool> DeleteUserAsync(int id);
+        Task<bool> DeleteUserAsync(Guid id);
     }
 }

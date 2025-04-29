@@ -27,7 +27,7 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Get department by ID
-        public async Task<Department?> GetByIdAsync(int id)
+        public async Task<Department?> GetByIdAsync(Guid id)
         {
             // Query database for department
             return await _context.Departments
@@ -66,7 +66,7 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Delete department
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             // Find department
             var department = await _context.Departments.FindAsync(id);

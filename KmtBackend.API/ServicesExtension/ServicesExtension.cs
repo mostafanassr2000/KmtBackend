@@ -25,5 +25,20 @@ namespace KmtBackend.API.ServicesExtension
         {
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         }
+
+        public static void AddPermissionPolicies(this IServiceCollection services)
+        {
+            services.AddAuthorizationBuilder()
+                .AddPolicy("Permission:users.create", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireAssertion(context =>
+                    {
+                        // Check if the user has the required permission claim
+                        return context.User.HasClaim(c =>
+                            c.Type == "permission" && c.Value == "users.create");
+                    });
+                });
+        }
     }
 }

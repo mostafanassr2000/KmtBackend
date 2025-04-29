@@ -1,6 +1,7 @@
 using KmtBackend.DAL.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -23,14 +24,34 @@ namespace KmtBackend.Infrastructure.TokenGenerator
                     Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
                 SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.UniqueName, user.Username),
+                new(JwtRegisteredClaimNames.Email, user.Email),
+                //new Claim(ClaimTypes.Role, user.Role),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
+
+            // Add role claims from user's assigned roles
+            if (user.UserRoles != null)
+            {
+                foreach (var userRole in user.UserRoles)
+                {
+                    // Add role name as a role claim
+                    claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+
+                    // Add permissions as custom claims
+                    if (userRole.Role.RolePermissions != null)
+                    {
+                        foreach (var rolePermission in userRole.Role.RolePermissions)
+                        {
+                            // Add permission code as custom claim
+                            claims.Add(new Claim("permission", rolePermission.Permission.Code));
+                        }
+                    }
+                }
+            }
 
             var securityToken = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,

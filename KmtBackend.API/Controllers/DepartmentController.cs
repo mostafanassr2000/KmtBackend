@@ -26,7 +26,7 @@ namespace KmtBackend.API.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var department = await _departmentService.GetDepartmentByIdAsync(id);
             
@@ -54,7 +54,7 @@ namespace KmtBackend.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, UpdateDepartmentRequest request)
+        public async Task<IActionResult> Update(Guid id, UpdateDepartmentRequest request)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace KmtBackend.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _departmentService.DeleteDepartmentAsync(id);
             

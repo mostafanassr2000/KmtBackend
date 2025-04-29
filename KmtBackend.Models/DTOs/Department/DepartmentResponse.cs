@@ -4,7 +4,7 @@ namespace KmtBackend.API.DTOs.Department
     public class DepartmentResponse
     {
         // Department ID
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Department name (language-specific)
         public string Name { get; set; } = null!;

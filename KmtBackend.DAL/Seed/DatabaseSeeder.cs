@@ -41,7 +41,7 @@ namespace KmtBackend.DAL.Seed
         private static async Task SeedSuperAdminAsync(KmtDbContext context, IServiceProvider services)
         {
             // Check if super admin already exists
-            if (await context.Users.AnyAsync(u => u.Role == "Admin" && u.Email == "admin@admin.com"))
+            if (await context.Users.AnyAsync(u => u.Email == "admin@admin.com"))
             {
                 return; // Super admin already exists
             }
@@ -54,7 +54,7 @@ namespace KmtBackend.DAL.Seed
             {
                 Username = "admin",
                 Email = "admin@admin.com",
-                Role = "Admin",
+                //Role = "Admin",
                 Title = "Super Administrator",
                 CreatedAt = DateTime.UtcNow
             };

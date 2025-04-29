@@ -14,7 +14,7 @@ namespace KmtBackend.API.DTOs.Auth
     public class UserDto
     {
         // User ID
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Username
         public string Username { get; set; } = null!;
@@ -23,7 +23,7 @@ namespace KmtBackend.API.DTOs.Auth
         public string Email { get; set; } = null!;
         
         // User role (Admin/User)
-        public string Role { get; set; } = null!;
+        //public string Role { get; set; } = null!;
         
         // Job title
         public string? Title { get; set; }
@@ -36,7 +36,7 @@ namespace KmtBackend.API.DTOs.Auth
     public class DepartmentDto
     {
         // Department ID
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Name (localized based on language)
         public string Name { get; set; } = null!;

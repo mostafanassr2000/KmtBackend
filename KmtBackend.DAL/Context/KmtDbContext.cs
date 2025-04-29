@@ -11,17 +11,16 @@ namespace KmtBackend.DAL.Context
             // Empty constructor passes options to base
         }
 
-        // DbSet for Users entity
         public DbSet<User> Users { get; set; } = null!;
-        // DbSet for Departments entity
         public DbSet<Department> Departments { get; set; } = null!;
+        public DbSet<Role> Roles { get; set; } = null!;
+        public DbSet<Permission> Permissions { get; set; } = null!;
+        public DbSet<UserRole> UserRoles { get; set; } = null!;
+        public DbSet<RolePermission> RolePermissions { get; set; } = null!;
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Apply all configurations from assembly
-            //modelBuilder
-            //    .ApplyConfigurationsFromAssembly(typeof(KmtDbContext).Assembly);
-
             // User email must be unique
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
@@ -33,6 +32,26 @@ namespace KmtBackend.DAL.Context
                 .WithOne(u => u.Department)
                 .HasForeignKey(u => u.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Permission code must be unique
+            modelBuilder.Entity<Permission>()
+                .HasIndex(p => p.Code)
+                .IsUnique();
+
+            // Role name must be unique
+            modelBuilder.Entity<Role>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
+
+            // UserRole unique constraint
+            modelBuilder.Entity<UserRole>()
+                .HasIndex(ur => new { ur.UserId, ur.RoleId })
+                .IsUnique();
+
+            // RolePermission unique constraint
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(rp => new { rp.RoleId, rp.PermissionId })
+                .IsUnique();
 
             // Call base implementation
             base.OnModelCreating(modelBuilder);

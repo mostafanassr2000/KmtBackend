@@ -11,7 +11,7 @@ namespace KmtBackend.DAL.Repositories.Interfaces
     public interface IDepartmentRepository
     {
         // Get department by ID
-        Task<Department?> GetByIdAsync(int id);
+        Task<Department?> GetByIdAsync(Guid id);
         
         // Get all departments
         Task<IEnumerable<Department>> GetAllAsync();
@@ -23,7 +23,7 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         Task<Department> UpdateAsync(Department department);
         
         // Delete department
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteAsync(Guid id);
     }
 }
 

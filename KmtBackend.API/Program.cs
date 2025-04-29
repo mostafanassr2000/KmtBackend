@@ -71,6 +71,7 @@ c.AddSecurityRequirement(new OpenApiSecurityRequirement
 builder.Services.RegisterManagers();
 builder.Services.RegisterRepositories();
 builder.Services.RegisterServices();
+builder.Services.AddPermissionPolicies();
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
