@@ -1,7 +1,6 @@
 using KmtBackend.DAL.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -29,7 +28,6 @@ namespace KmtBackend.Infrastructure.TokenGenerator
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.UniqueName, user.Username),
                 new(JwtRegisteredClaimNames.Email, user.Email),
-                //new Claim(ClaimTypes.Role, user.Role),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 

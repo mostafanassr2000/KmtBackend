@@ -37,9 +37,16 @@ namespace KmtBackend.DAL.Repositories
         // Find user by email for authentication
         public async Task<User?> GetByEmailAsync(string email)
         {
-            // Case-insensitive email comparison
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+                .Where(u => u.Email.ToLower() == email.ToLower())
+                // Include user roles and role information
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                .Include(u => u.Department)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
         }
 
         // Find user by username (alternative login)
