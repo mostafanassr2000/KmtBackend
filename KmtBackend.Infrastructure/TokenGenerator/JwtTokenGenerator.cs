@@ -1,6 +1,7 @@
 using KmtBackend.DAL.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -55,7 +56,7 @@ namespace KmtBackend.Infrastructure.TokenGenerator
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-                claims: claims,
+                claims: claims.DistinctBy(c => c.Value),
                 signingCredentials: signingCredentials);
 
             return new JwtSecurityTokenHandler().WriteToken(securityToken);

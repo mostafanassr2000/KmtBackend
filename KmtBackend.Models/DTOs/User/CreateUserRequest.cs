@@ -12,13 +12,10 @@ namespace KmtBackend.API.DTOs.User
         // Password (will be hashed)
         public string Password { get; set; } = null!;
         
-        // User role (Admin/User)
-        public string Role { get; set; } = "User";
-        
         // Job title
         public string? Title { get; set; }
         
         // Department ID
-        public int? DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
     }
 }
