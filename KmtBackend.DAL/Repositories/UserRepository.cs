@@ -125,5 +125,17 @@ namespace KmtBackend.DAL.Repositories
             return await _context.Users
                 .AnyAsync(u => u.Username.ToLower() == username.ToLower());
         }
+
+        /// <summary>
+        /// Gets a user with their roles included
+        /// </summary>
+        public async Task<User?> GetUserWithRolesAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.Roles)
+                .ThenInclude(r => r.Permissions)
+                .Include(u => u.Department)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }

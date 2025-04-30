@@ -103,7 +103,12 @@ namespace KmtBackend.DAL.Seed
             logger.LogInformation("Seeding roles...");
 
             // Check if admin role needs to be created
-            var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Super Admin");
+            //var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Super Admin");
+            var adminRole = await context.Roles.Where(r => r.Name == "Super Admin")
+                .Include(r => r.Permissions)
+                .FirstOrDefaultAsync();
+            // Get all permissions
+            var allPermissions = await context.Permissions.ToListAsync();
 
             if (adminRole == null)
             {
@@ -121,21 +126,12 @@ namespace KmtBackend.DAL.Seed
                     CreatedAt = DateTime.UtcNow
                 };
 
+                adminRole.Permissions = allPermissions;
+
                 // Add role to context
                 await context.Roles.AddAsync(adminRole);
+
                 // Save to get role ID
-                await context.SaveChangesAsync();
-
-                // Get all permissions
-                var allPermissions = await context.Permissions.ToListAsync();
-
-                // Assign all permissions to admin role
-                foreach (var permission in allPermissions)
-                {
-                    adminRole.Permissions.Add(permission);
-                }
-
-                // Save all role permissions
                 await context.SaveChangesAsync();
 
                 // Log success
@@ -143,29 +139,18 @@ namespace KmtBackend.DAL.Seed
             }
             else
             {
-                // Log that admin role already exists
-                logger.LogInformation("Super Admin role already exists");
+                // Fetch the permissions already assigned to the admin role
+                var assignedPermissions = adminRole.Permissions.ToList();
 
-                var missingPermissions = await context.Permissions.Except(adminRole.Permissions).ToListAsync();
+                // Perform the Except operation in memory
+                var missingPermissions = allPermissions.Except(assignedPermissions).ToList();
 
-                // Assign any missing permissions
-                if (missingPermissions.Any())
+                // Add the missing permissions to the admin role
+                foreach (var missingPermission in missingPermissions)
                 {
-                    // Log missing permissions being added
-                    logger.LogInformation("Adding {Count} missing permissions to Super Admin role", missingPermissions.Count);
-
-                    // Create role-permission relationships for missing permissions
-                    foreach (var missingPermission in missingPermissions)
-                    {
-                        adminRole.Permissions.Add(missingPermission);
-                    }
-
-                    // Save changes
-                    await context.SaveChangesAsync();
-
-                    // Log success
-                    logger.LogInformation("Missing permissions added to Super Admin role");
+                    adminRole.Permissions.Add(missingPermission);
                 }
+                await context.SaveChangesAsync();
             }
         }
 

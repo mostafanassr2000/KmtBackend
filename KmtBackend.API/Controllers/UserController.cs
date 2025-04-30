@@ -1,5 +1,7 @@
+using KmtBackend.API.Attributes;
 using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
+using KmtBackend.DAL.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +19,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.ViewUsers)]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -26,7 +28,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.ViewUsers)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -38,7 +40,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.CreateUsers)]
         public async Task<IActionResult> Create(CreateUserRequest request)
         {
             try
@@ -54,7 +56,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.UpdateUsers)]
         public async Task<IActionResult> Update(Guid id, UpdateUserRequest request)
         {
             try
@@ -73,7 +75,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.DeleteUsers)]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _userService.DeleteUserAsync(id);

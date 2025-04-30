@@ -34,5 +34,7 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         
         // Check if username is already taken
         Task<bool> UsernameExistsAsync(string username);
+
+        Task<User?> GetUserWithRolesAsync(Guid id);
     }
 }

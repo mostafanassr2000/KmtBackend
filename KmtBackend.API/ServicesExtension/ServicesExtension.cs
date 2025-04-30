@@ -14,12 +14,17 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<IAuthManager, AuthManager>();
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IDepartmentManager, DepartmentManager>();
+            services.AddScoped<IRoleManager, RoleManager>();
+            services.AddScoped<IPermissionManager, PermissionManager>();
+            services.AddScoped<IUserRoleManager, UserRoleManager>();
         }
 
         public static void RegisterRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
         }
 
         public static void RegisterServices(this IServiceCollection services)

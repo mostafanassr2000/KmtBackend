@@ -1,5 +1,7 @@
+using KmtBackend.API.Attributes;
 using KmtBackend.API.DTOs.Department;
 using KmtBackend.BLL.Managers.Interfaces;
+using KmtBackend.DAL.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +19,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [RequirePermission(Permissions.ViewDepartments)]
         public async Task<IActionResult> GetAll()
         {
             var departments = await _departmentService.GetAllDepartmentsAsync();
@@ -25,7 +27,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [RequirePermission(Permissions.ViewDepartments)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var department = await _departmentService.GetDepartmentByIdAsync(id);
@@ -37,7 +39,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.CreateDepartments)]
         public async Task<IActionResult> Create(CreateDepartmentRequest request)
         {
             try
@@ -53,7 +55,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.UpdateDepartments)]
         public async Task<IActionResult> Update(Guid id, UpdateDepartmentRequest request)
         {
             try
@@ -72,7 +74,7 @@ namespace KmtBackend.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(Permissions.DeleteDepartments)]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _departmentService.DeleteDepartmentAsync(id);
