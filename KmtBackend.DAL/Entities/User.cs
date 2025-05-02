@@ -27,20 +27,6 @@ namespace KmtBackend.DAL.Entities
         // Storing hashed password only
         [Required]
         public string PasswordHash { get; set; } = null!;
-        
-        // Employee title or position
-        [MaxLength(100)]
-        public string? Title { get; set; }
-
-        // Employee arabic title or position
-        [MaxLength(100)]
-        public string? TitleAr { get; set; }
-
-        // Role for RBAC (Admin or User)
-
-        //[Required]
-        //[MaxLength(20)]
-        //public string Role { get; set; } = "User";
 
         /// <summary>
         /// Collection of roles assigned to this user
@@ -53,7 +39,14 @@ namespace KmtBackend.DAL.Entities
         // Navigation property
         [ForeignKey("DepartmentId")]
         public Department? Department { get; set; }
-        
+
+        // Foreign key to Title
+        public Guid? TitleId { get; set; }
+
+        // Navigation property
+        [ForeignKey("TitleId")]
+        public Title? Title { get; set; }
+
         // Timestamp for record creation
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         

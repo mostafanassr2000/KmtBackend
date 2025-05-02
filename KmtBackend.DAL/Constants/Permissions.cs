@@ -52,11 +52,35 @@ namespace KmtBackend.DAL.Constants
         /// Permission to delete departments
         /// </summary>
         public const string DeleteDepartments = "departments.delete";
-        
+
         #endregion
-        
+
+        #region Title Permissions
+
+        /// <summary>
+        /// Permission to view all titles
+        /// </summary>
+        public const string ViewTitles = "titles.view";
+
+        /// <summary>
+        /// Permission to create new titles
+        /// </summary>
+        public const string CreateTitles = "titles.create";
+
+        /// <summary>
+        /// Permission to update existing titles
+        /// </summary>
+        public const string UpdateTitles = "titles.update";
+
+        /// <summary>
+        /// Permission to delete titles
+        /// </summary>
+        public const string DeleteTitles = "titles.delete";
+
+        #endregion
+
         #region Role Permissions
-        
+
         /// <summary>
         /// Permission to view all roles
         /// </summary>
@@ -118,6 +142,12 @@ namespace KmtBackend.DAL.Constants
                 CreateDepartments,
                 UpdateDepartments,
                 DeleteDepartments,
+
+                // Title permissions
+                ViewTitles,
+                CreateTitles,
+                UpdateTitles,
+                DeleteTitles,
                 
                 // Role permissions
                 ViewRoles,
@@ -152,7 +182,13 @@ namespace KmtBackend.DAL.Constants
                 [CreateDepartments] = ("Create new departments", "إنشاء أقسام جديدة"),
                 [UpdateDepartments] = ("Update existing departments", "تحديث الأقسام الحالية"),
                 [DeleteDepartments] = ("Delete departments", "حذف الأقسام"),
-                
+
+                // Title permissions
+                [ViewTitles] = ("View all titles", "عرض جميع الوظائف"),
+                [CreateTitles] = ("Create new titles", "إنشاء وظائف جديدة"),
+                [UpdateTitles] = ("Update existing titles", "تحديث الوظائف الحالية"),
+                [DeleteTitles] = ("Delete titles", "حذف الوظائف"),
+
                 // Role permissions
                 [ViewRoles] = ("View all roles", "عرض جميع الأدوار"),
                 [CreateRoles] = ("Create new roles", "إنشاء أدوار جديدة"),

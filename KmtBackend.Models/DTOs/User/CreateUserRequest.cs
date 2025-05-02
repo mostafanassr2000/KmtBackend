@@ -13,7 +13,7 @@ namespace KmtBackend.API.DTOs.User
         public string Password { get; set; } = null!;
         
         // Job title
-        public string? Title { get; set; }
+        public Guid? TitleId { get; set; }
         
         // Department ID
         public Guid? DepartmentId { get; set; }

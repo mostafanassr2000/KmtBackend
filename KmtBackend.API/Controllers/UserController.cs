@@ -4,6 +4,7 @@ using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
 using KmtBackend.DAL.Entities;
+using KmtBackend.Models.DTOs.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KmtBackend.API.Controllers

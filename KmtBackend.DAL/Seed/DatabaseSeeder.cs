@@ -176,7 +176,6 @@ namespace KmtBackend.DAL.Seed
                 Id = Guid.NewGuid(),
                 Username = "admin",
                 Email = "admin@admin.com",
-                Title = "Super Administrator",
                 CreatedAt = DateTime.UtcNow
             };
 

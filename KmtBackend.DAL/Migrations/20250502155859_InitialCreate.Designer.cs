@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KmtBackend.DAL.Migrations
 {
     [DbContext(typeof(KmtDbContext))]
-    [Migration("20250429124654_InitialCreate")]
+    [Migration("20250502155859_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,6 +35,10 @@ namespace KmtBackend.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DescriptionAr")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -126,6 +130,39 @@ namespace KmtBackend.DAL.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("KmtBackend.DAL.Entities.Title", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DescriptionAr")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NameAr")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Titles");
+                });
+
             modelBuilder.Entity("KmtBackend.DAL.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -147,13 +184,8 @@ namespace KmtBackend.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TitleAr")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid?>("TitleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -169,6 +201,8 @@ namespace KmtBackend.DAL.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("TitleId");
 
                     b.ToTable("Users");
                 });
@@ -210,7 +244,14 @@ namespace KmtBackend.DAL.Migrations
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("KmtBackend.DAL.Entities.Title", "Title")
+                        .WithMany("Users")
+                        .HasForeignKey("TitleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Department");
+
+                    b.Navigation("Title");
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -244,6 +285,11 @@ namespace KmtBackend.DAL.Migrations
                 });
 
             modelBuilder.Entity("KmtBackend.DAL.Entities.Department", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("KmtBackend.DAL.Entities.Title", b =>
                 {
                     b.Navigation("Users");
                 });

@@ -7,6 +7,7 @@ using KmtBackend.API.DTOs.User;
 using Mapster;
 // Mapster mapping library
 using System.Globalization;
+using KmtBackend.Models.DTOs.User;
 // Culture info for localization
 
 namespace KmtBackend.API.Mapping
@@ -23,19 +24,10 @@ namespace KmtBackend.API.Mapping
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Username, src => src.Username)
                 .Map(dest => dest.Email, src => src.Email)
-                //.Map(dest => dest.Role, src => src.Role)
                 .Map(dest => dest.Title, src => src.Title)
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
-                // Conditionally map department if exists
-                .Map(dest => dest.Department, src => src.Department == null ? null : new DepartmentResponse
-                {
-                    Id = src.Department.Id,
-                    // Use Arabic name if Arabic culture is current
-                    Name = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.NameAr)
-                        ? src.Department.NameAr
-                        : src.Department.Name
-                });
+                .Map(dest => dest.Department, src => src.Department);
 
             // User to UserDto mapping (for auth response)
             config.NewConfig<User, UserDto>()
@@ -58,21 +50,12 @@ namespace KmtBackend.API.Mapping
             config.NewConfig<CreateUserRequest, User>()
                 .Map(dest => dest.Username, src => src.Username)
                 .Map(dest => dest.Email, src => src.Email)
-                //.Map(dest => dest.Role, src => src.Role)
-                .Map(dest => dest.Title, src => src.Title)
+                .Map(dest => dest.TitleId, src => src.TitleId)
                 .Map(dest => dest.DepartmentId, src => src.DepartmentId)
                 // Don't map password directly - it's handled in service
                 .Ignore(dest => dest.PasswordHash)
                 // Set creation timestamp
                 .Map(dest => dest.CreatedAt, src => DateTime.UtcNow);
-
-            // Department to DepartmentResponse mapping
-            config.NewConfig<Department, DepartmentResponse>()
-                .Map(dest => dest.Id, src => src.Id)
-                // Use Arabic name if Arabic culture is current
-                .Map(dest => dest.Name, src => CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.NameAr)
-                    ? src.NameAr
-                    : src.Name);
         }
     }
 }

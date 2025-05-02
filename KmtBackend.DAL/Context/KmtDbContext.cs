@@ -15,6 +15,7 @@ namespace KmtBackend.DAL.Context
         public DbSet<Department> Departments { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Permission> Permissions { get; set; } = null!;
+        public DbSet<Title> Titles { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,6 +41,13 @@ namespace KmtBackend.DAL.Context
             modelBuilder.Entity<Role>()
                 .HasIndex(r => r.Name)
                 .IsUnique();
+
+            // Title has many users
+            modelBuilder.Entity<Title>()
+                .HasMany(d => d.Users)
+                .WithOne(u => u.Title)
+                .HasForeignKey(u => u.TitleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Call base implementation
             base.OnModelCreating(modelBuilder);

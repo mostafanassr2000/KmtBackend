@@ -1,15 +1,7 @@
 using KmtBackend.DAL.Context;
-// Database context
 using KmtBackend.DAL.Entities;
-// Domain models
 using KmtBackend.DAL.Repositories.Interfaces;
-// Repository interfaces
 using Microsoft.EntityFrameworkCore;
-// EF Core functionality
-using System.Collections.Generic;
-// Collections
-using System.Threading.Tasks;
-// Async operations
 
 namespace KmtBackend.DAL.Repositories
 {

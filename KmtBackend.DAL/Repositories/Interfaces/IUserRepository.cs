@@ -19,7 +19,10 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         
         // Get users by department
         Task<IEnumerable<User>> GetByDepartmentAsync(Guid departmentId);
-        
+
+        // Get users by title
+        Task<IEnumerable<User>> GetByTitleAsync(Guid titleId);
+
         // Create new user
         Task<User> CreateAsync(User user);
         

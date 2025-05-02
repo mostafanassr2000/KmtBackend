@@ -2,6 +2,7 @@ using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Models.DTOs.User;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 
@@ -79,7 +80,7 @@ namespace KmtBackend.BLL.Managers
 
             user.Username = request.Username;
             user.Email = request.Email;
-            user.Title = request.Title;
+            user.TitleId = request.TitleId;
             user.DepartmentId = request.DepartmentId;
             
             if (!string.IsNullOrEmpty(request.Password))

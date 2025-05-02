@@ -1,4 +1,5 @@
 using KmtBackend.API.DTOs.User;
+using KmtBackend.Models.DTOs.User;
 
 namespace KmtBackend.BLL.Managers.Interfaces
 {

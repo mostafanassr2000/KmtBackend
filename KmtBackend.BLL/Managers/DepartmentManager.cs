@@ -59,6 +59,7 @@ namespace KmtBackend.BLL.Managers
                 Name = request.Name,
                 NameAr = request.NameAr,
                 Description = request.Description,
+                DescriptionAr = request.DescriptionAr,
                 CreatedAt = DateTime.UtcNow
             };
             

@@ -72,6 +72,15 @@ namespace KmtBackend.DAL.Repositories
                 .ToListAsync();
         }
 
+        // Get users filtered by department
+        public async Task<IEnumerable<User>> GetByTitleAsync(Guid titleId)
+        {
+            // Filter by title ID
+            return await _context.Users
+                .Where(u => u.TitleId == titleId)
+                .ToListAsync();
+        }
+
         // Create new user
         public async Task<User> CreateAsync(User user)
         {
