@@ -1,3 +1,4 @@
+using KmtBackend.API.Common;
 using KmtBackend.API.DTOs.Auth;
 using KmtBackend.BLL.Managers.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace KmtBackend.API.Controllers
             {
                 var response = await _authService.LoginAsync(request);
                 
-                return Ok(response);
+                return Ok(new ResponseWrapper(response, "Logged In Successfully!", true));
             }
             catch (Exception ex)
             {
