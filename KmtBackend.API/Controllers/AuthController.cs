@@ -30,13 +30,5 @@ namespace KmtBackend.API.Controllers
                 return Unauthorized(new { message = ex.Message });
             }
         }
-
-        [HttpPost("validate-token")]
-        public async Task<IActionResult> ValidateToken([FromBody] string token)
-        {
-            var isValid = await _authService.ValidateTokenAsync(token);
-            
-            return Ok(new { isValid });
-        }
     }
 }

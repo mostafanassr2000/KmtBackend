@@ -1,6 +1,8 @@
 using KmtBackend.API.Attributes;
+using KmtBackend.API.Common;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
+using KmtBackend.DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KmtBackend.API.Controllers
@@ -38,7 +40,7 @@ namespace KmtBackend.API.Controllers
             // Get all permissions from manager
             var permissions = await _permissionManager.GetAllPermissionsAsync();
             // Return OK with permissions
-            return Ok(permissions);
+            return Ok(new ResponseWrapper(permissions, "Retrieved Permissions Successfully.", true));
         }
         
         /// <summary>
@@ -55,10 +57,10 @@ namespace KmtBackend.API.Controllers
             
             // Return 404 if not found
             if (permission == null)
-                return NotFound();
-                
+                return NotFound(new ResponseWrapper(null, "Permission Not Found", false));
+
             // Return OK with permission
-            return Ok(permission);
+            return Ok(new ResponseWrapper(permission, "Retrieved Permission Successfully.", true));
         }
     }
 }

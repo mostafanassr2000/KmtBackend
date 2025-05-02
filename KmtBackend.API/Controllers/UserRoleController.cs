@@ -1,4 +1,5 @@
 using KmtBackend.API.Attributes;
+using KmtBackend.API.Common;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.User;
@@ -40,7 +41,7 @@ namespace KmtBackend.API.Controllers
             // Get user roles from manager
             var roles = await _userRoleManager.GetUserRolesAsync(userId);
             // Return OK with roles
-            return Ok(roles);
+            return Ok(new ResponseWrapper(roles, "Retrieved Roles Successfully.", true));
         }
         
         /// <summary>
@@ -58,16 +59,16 @@ namespace KmtBackend.API.Controllers
                 // Assign roles through manager
                 var user = await _userRoleManager.AssignRolesToUserAsync(userId, request);
                 // Return OK with updated user
-                return Ok(user);
+                return Ok(new ResponseWrapper(user, "Assigned Roles Successfully.", true));
             }
             catch (Exception ex)
             {
                 // Return not found if user doesn't exist
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new { message = ex.Message });
-                    
+                    return NotFound(new ResponseWrapper(null, "User Not Found", false));
+
                 // Return bad request for other errors
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
             }
         }
     }

@@ -1,6 +1,8 @@
 using KmtBackend.API.Attributes;
+using KmtBackend.API.Common;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
+using KmtBackend.DAL.Entities;
 using KmtBackend.Models.DTOs.Role;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,7 +41,7 @@ namespace KmtBackend.API.Controllers
             // Get all roles from manager
             var roles = await _roleManager.GetAllRolesAsync();
             // Return OK with roles
-            return Ok(roles);
+            return Ok(new ResponseWrapper(roles, "Retrieved Roles Successfully.", true));
         }
         
         /// <summary>
@@ -56,10 +58,10 @@ namespace KmtBackend.API.Controllers
             
             // Return 404 if not found
             if (role == null)
-                return NotFound();
-                
+                return NotFound(new ResponseWrapper(null, "Role Not Found", false));
+
             // Return OK with role
-            return Ok(role);
+            return Ok(new ResponseWrapper(role, "Retrieved Role Successfully.", true));
         }
         
         /// <summary>
@@ -76,12 +78,12 @@ namespace KmtBackend.API.Controllers
                 // Create role through manager
                 var role = await _roleManager.CreateRoleAsync(request);
                 // Return created result with new role
-                return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
+                return CreatedAtAction(null, new ResponseWrapper(role, "Role Created Succesfully.", true));
             }
             catch (Exception ex)
             {
                 // Return bad request with error message
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
             }
         }
         
@@ -100,16 +102,16 @@ namespace KmtBackend.API.Controllers
                 // Update role through manager
                 var role = await _roleManager.UpdateRoleAsync(id, request);
                 // Return OK with updated role
-                return Ok(role);
+                return Ok(new ResponseWrapper(role, "Updated Role Successfully.", true));
             }
             catch (Exception ex)
             {
                 // Return not found if role doesn't exist
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new { message = ex.Message });
-                    
+                    return NotFound(new ResponseWrapper(null, "Role Not Found", false));
+
                 // Return bad request for other errors
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
             }
         }
         
@@ -127,8 +129,8 @@ namespace KmtBackend.API.Controllers
             
             // Return 404 if role not found
             if (!result)
-                return NotFound();
-                
+                return NotFound(new ResponseWrapper(null, "Role Not Found", false));
+
             // Return 204 No Content on success
             return NoContent();
         }
@@ -148,16 +150,16 @@ namespace KmtBackend.API.Controllers
                 // Assign permissions through manager
                 var role = await _roleManager.AssignPermissionsAsync(id, request);
                 // Return OK with updated role
-                return Ok(role);
+                return Ok(new ResponseWrapper(role, "Assigned Permissions Successfully.", true));
             }
             catch (Exception ex)
             {
                 // Return not found if role doesn't exist
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new { message = ex.Message });
-                    
+                    return NotFound(new ResponseWrapper(null, "Role Not Found", false));
+
                 // Return bad request for other errors
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
             }
         }
     }
