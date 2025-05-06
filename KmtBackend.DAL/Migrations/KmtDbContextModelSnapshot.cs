@@ -181,6 +181,11 @@ namespace KmtBackend.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
                     b.Property<Guid?>("TitleId")
                         .HasColumnType("uniqueidentifier");
 

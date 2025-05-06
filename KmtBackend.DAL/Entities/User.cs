@@ -1,18 +1,11 @@
-using System.Collections;
 using System.ComponentModel.DataAnnotations;
-// Validation attributes for properties
 using System.ComponentModel.DataAnnotations.Schema;
-// Database schema configuration
 
 namespace KmtBackend.DAL.Entities
 {
     // User entity represents both regular users and admins
-    public class User
-    {
-        // Primary key for the user
-        [Key]
-        public Guid Id { get; set; }
-        
+    public class User : BaseEntity
+    {      
         // Username for login purposes
         [Required]
         [MaxLength(50)]
@@ -23,7 +16,13 @@ namespace KmtBackend.DAL.Entities
         [MaxLength(100)]
         [EmailAddress]
         public string Email { get; set; } = null!;
-        
+
+        // PhoneNumber must be unique
+        [Required]
+        [MaxLength(13)]
+        [Phone]
+        public string PhoneNumber { get; set; } = null!;
+
         // Storing hashed password only
         [Required]
         public string PasswordHash { get; set; } = null!;
@@ -46,11 +45,5 @@ namespace KmtBackend.DAL.Entities
         // Navigation property
         [ForeignKey("TitleId")]
         public Title? Title { get; set; }
-
-        // Timestamp for record creation
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
-        // Last update timestamp
-        public DateTime? UpdatedAt { get; set; }
     }
 }

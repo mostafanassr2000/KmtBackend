@@ -66,27 +66,28 @@ namespace KmtBackend.BLL.Managers
                 throw new Exception("User not found");
             }
 
-            if (request.Email != user.Email && 
-                await _userRepository.EmailExistsAsync(request.Email))
-            {
-                throw new Exception("Email already exists");
-            }
+            //if (request.Email != user.Email && 
+            //    await _userRepository.EmailExistsAsync(request.Email))
+            //{
+            //    throw new Exception("Email already exists");
+            //}
 
-            if (request.Username != user.Username && 
-                await _userRepository.UsernameExistsAsync(request.Username))
-            {
-                throw new Exception("Username already exists");
-            }
+            //if (request.Username != user.Username && 
+            //    await _userRepository.UsernameExistsAsync(request.Username))
+            //{
+            //    throw new Exception("Username already exists");
+            //}
 
-            user.Username = request.Username;
-            user.Email = request.Email;
-            user.TitleId = request.TitleId;
-            user.DepartmentId = request.DepartmentId;
+            user.Username = request.Username ?? user.Username;
+            user.Email = request.Email ?? user.Email;
+            user.TitleId = request.TitleId ?? user.TitleId;
+            user.DepartmentId = request.DepartmentId ?? user.DepartmentId;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
             
-            if (!string.IsNullOrEmpty(request.Password))
-            {
-                user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
-            }
+            //if (!string.IsNullOrEmpty(request.Password))
+            //{
+            //    user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+            //}
 
             var updatedUser = await _userRepository.UpdateAsync(user);
             

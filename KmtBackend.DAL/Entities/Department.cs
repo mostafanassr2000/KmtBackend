@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KmtBackend.DAL.Entities
 {
-    public class Department
+    public class Department : BaseEntity
     {
-        [Key]
-        public Guid Id { get; set; }
         
         [Required]
         [MaxLength(100)]
@@ -20,8 +18,5 @@ namespace KmtBackend.DAL.Entities
         public string? DescriptionAr { get; set; }
 
         public virtual ICollection<User> Users { get; set; } = [];
-        
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
     }
 }

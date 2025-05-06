@@ -31,6 +31,7 @@ namespace KmtBackend.DAL.Repositories
             // Query with included department
             return await _context.Users
                 .Include(u => u.Department)
+                .Include(u => u.Title)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 

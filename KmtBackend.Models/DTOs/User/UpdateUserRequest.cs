@@ -4,13 +4,13 @@ namespace KmtBackend.Models.DTOs.User
     public class UpdateUserRequest
     {
         // Updated username
-        public string Username { get; set; } = null!;
+        public string? Username { get; set; }
 
         // Updated email
-        public string Email { get; set; } = null!;
+        public string? Email { get; set; }
 
-        // Optional new password
-        public string? Password { get; set; }
+        // Updated phone number
+        public string? PhoneNumber { get; set; }
 
         // Updated job title
         public Guid? TitleId { get; set; }

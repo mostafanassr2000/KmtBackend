@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KmtBackend.DAL.Migrations
 {
     [DbContext(typeof(KmtDbContext))]
-    [Migration("20250502155859_InitialCreate")]
+    [Migration("20250506114240_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -183,6 +183,11 @@ namespace KmtBackend.DAL.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<Guid?>("TitleId")
                         .HasColumnType("uniqueidentifier");

@@ -8,11 +8,9 @@ namespace KmtBackend.Models.DTOs.Title
 
         // Department name
         public string Name { get; set; } = null!;
-        public string NameAr { get; set; } = null!;
 
         // Optional description
         public string? Description { get; set; }
-        public string? DescriptionAr { get; set; }
 
         // Creation date
         public DateTime CreatedAt { get; set; }

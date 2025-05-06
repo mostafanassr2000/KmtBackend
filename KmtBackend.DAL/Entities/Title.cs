@@ -2,14 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KmtBackend.DAL.Entities
 {
-    public class Title
+    public class Title : BaseEntity
     {
-        /// <summary>
-        /// Primary key for the title
-        /// </summary>
-        [Key]
-        public Guid Id { get; set; }
-
         /// <summary>
         /// Name of title
         /// </summary>
@@ -35,15 +29,5 @@ namespace KmtBackend.DAL.Entities
         public string? DescriptionAr { get; set; }
 
         public virtual ICollection<User> Users { get; set; } = [];
-
-        /// <summary>
-        /// Creation timestamp
-        /// </summary>
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
-        /// <summary>
-        /// Last update timestamp
-        /// </summary>
-        public DateTime? UpdatedAt { get; set; }
     }
 }

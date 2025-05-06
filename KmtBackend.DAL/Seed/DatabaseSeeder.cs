@@ -176,7 +176,8 @@ namespace KmtBackend.DAL.Seed
                 Id = Guid.NewGuid(),
                 Username = "admin",
                 Email = "admin@admin.com",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PhoneNumber = "+201010101010"
             };
 
             // Hash password

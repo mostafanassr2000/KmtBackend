@@ -1,16 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
 
 namespace KmtBackend.DAL.Entities
 {
-    public class Role
+    public class Role : BaseEntity
     {
-        /// <summary>
-        /// Primary key for the role
-        /// </summary>
-        [Key]
-        public Guid Id { get; set; }
-        
         /// <summary>
         /// Name of the role (e.g., "Admin", "Editor")
         /// </summary>
@@ -46,15 +39,5 @@ namespace KmtBackend.DAL.Entities
         /// Collection of permissions assigned to this role
         /// </summary>
         public virtual ICollection<Permission> Permissions { get; set; } = [];
-        
-        /// <summary>
-        /// Creation timestamp
-        /// </summary>
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
-        /// <summary>
-        /// Last update timestamp
-        /// </summary>
-        public DateTime? UpdatedAt { get; set; }
     }
 }

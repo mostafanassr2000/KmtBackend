@@ -20,11 +20,11 @@ namespace KmtBackend.API.DTOs.Auth
         public string Username { get; set; } = null!;
         
         // Email address
-        public string Email { get; set; } = null!;
-        
-        // User role (Admin/User)
-        //public string Role { get; set; } = null!;
-        
+        public string? Email { get; set; } = null!;
+
+        // Phone Number
+        public string? PhoneNumber { get; set; } = null!;
+
         // Job title
         public string? Title { get; set; }
         
@@ -40,5 +40,6 @@ namespace KmtBackend.API.DTOs.Auth
         
         // Name (localized based on language)
         public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
     }
 }

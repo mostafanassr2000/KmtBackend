@@ -15,6 +15,9 @@ namespace KmtBackend.Models.DTOs.User
         // Email address
         public string Email { get; set; } = null!;
 
+        // Phone Number
+        public string PhoneNumber { get; set; } = null!;
+
         // Department info
         public DepartmentResponse? Department { get; set; }
 

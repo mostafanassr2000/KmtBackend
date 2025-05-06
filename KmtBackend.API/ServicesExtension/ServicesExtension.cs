@@ -17,6 +17,7 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<IRoleManager, RoleManager>();
             services.AddScoped<IPermissionManager, PermissionManager>();
             services.AddScoped<IUserRoleManager, UserRoleManager>();
+            services.AddScoped<ITitleManager, TitleManager>();
         }
 
         public static void RegisterRepositories(this IServiceCollection services)
@@ -25,6 +26,7 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<ITitleRepository, TitleRepository>();
         }
 
         public static void RegisterServices(this IServiceCollection services)

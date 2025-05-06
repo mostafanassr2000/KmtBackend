@@ -1,14 +1,11 @@
 using KmtBackend.DAL.Entities;
-// Domain models
 using KmtBackend.API.DTOs.Auth;
-// Auth DTOs
 using KmtBackend.API.DTOs.User;
-// User DTOs
 using Mapster;
-// Mapster mapping library
 using System.Globalization;
 using KmtBackend.Models.DTOs.User;
-// Culture info for localization
+using KmtBackend.API.DTOs.Department;
+using KmtBackend.Models.DTOs.Title;
 
 namespace KmtBackend.API.Mapping
 {
@@ -20,22 +17,37 @@ namespace KmtBackend.API.Mapping
         {
             // User to UserResponse mapping
             config.NewConfig<User, UserResponse>()
-                // Map basic properties
-                .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.Username, src => src.Username)
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.Title, src => src.Title)
-                .Map(dest => dest.CreatedAt, src => src.CreatedAt)
-                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
-                .Map(dest => dest.Department, src => src.Department);
+                .Map(dest => dest.Department, src => src.Department == null ? null : new DepartmentResponse
+                {
+                    Id = src.Department.Id,
+                    // Use Arabic name if Arabic culture is current
+                    Name = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.NameAr)
+                        ? src.Department.NameAr
+                        : src.Department.Name,
+                    Description = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.DescriptionAr)
+                        ? src.Department.DescriptionAr
+                        : src.Department.Description,
+                    CreatedAt = src.Department.CreatedAt,
+                    UpdatedAt = src.Department.UpdatedAt,
+                    UserCount = src.Department.Users.Count
+                })
+                .Map(dest => dest.Title, src => src.Title == null ? null : new TitleResponse
+                {
+                    Id = src.Title.Id,
+                    // Use Arabic name if Arabic culture is current
+                    Name = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Title.NameAr)
+                        ? src.Title.NameAr
+                        : src.Title.Name,
+                    Description = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Title.DescriptionAr)
+                        ? src.Title.DescriptionAr
+                        : src.Title.Description,
+                    CreatedAt = src.Title.CreatedAt,
+                    UpdatedAt = src.Title.UpdatedAt,
+                    UserCount = src.Title.Users.Count
+                });
 
             // User to UserDto mapping (for auth response)
             config.NewConfig<User, UserDto>()
-                .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.Username, src => src.Username)
-                .Map(dest => dest.Email, src => src.Email)
-                //.Map(dest => dest.Role, src => src.Role)
-                .Map(dest => dest.Title, src => src.Title)
                 // Conditionally map department if exists
                 .Map(dest => dest.Department, src => src.Department == null ? null : new DepartmentDto
                 {
@@ -43,15 +55,19 @@ namespace KmtBackend.API.Mapping
                     // Use Arabic name if Arabic culture is current
                     Name = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.NameAr)
                         ? src.Department.NameAr
-                        : src.Department.Name
-                });
+                        : src.Department.Name,
+                    Description = CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.DescriptionAr)
+                        ? src.Department.DescriptionAr
+                        : src.Department.Description
+                })
+                .Map(dest => dest.Title, src => src.Title == null
+                ? null
+                : CultureInfo.CurrentCulture.Name.StartsWith("ar") && !string.IsNullOrEmpty(src.Department.NameAr)
+                        ? src.Department.NameAr
+                        : src.Department.Name);
 
             // CreateUserRequest to User mapping
             config.NewConfig<CreateUserRequest, User>()
-                .Map(dest => dest.Username, src => src.Username)
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.TitleId, src => src.TitleId)
-                .Map(dest => dest.DepartmentId, src => src.DepartmentId)
                 // Don't map password directly - it's handled in service
                 .Ignore(dest => dest.PasswordHash)
                 // Set creation timestamp
