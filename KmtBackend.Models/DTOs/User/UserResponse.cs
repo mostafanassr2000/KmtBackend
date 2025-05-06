@@ -1,4 +1,4 @@
-using KmtBackend.API.DTOs.Department;
+using KmtBackend.Models.DTOs.Department;
 using KmtBackend.Models.DTOs.Title;
 
 namespace KmtBackend.Models.DTOs.User

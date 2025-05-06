@@ -3,7 +3,6 @@ using KmtBackend.API.Common;
 using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
-using KmtBackend.DAL.Entities;
 using KmtBackend.Models.DTOs.User;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,8 +24,12 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
-
-            return Ok(new ResponseWrapper(users, "Retrieved Users Successfully.", true));
+            return Ok(new ResponseWrapper<IEnumerable<UserResponse>>
+            {
+                Data = users,
+                Message = "Retrieved Users Successfully.",
+                Success = true
+            });
         }
 
         [HttpGet("{id}")]
@@ -34,11 +37,20 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
-            
-            if (user == null)
-                return NotFound(new ResponseWrapper(null, "User Not Found", false));
 
-            return Ok(new ResponseWrapper(user, "Retrieved User Successfully.", true));
+            if (user == null)
+                return NotFound(new ResponseWrapper<UserResponse>
+                {
+                    Message = "User Not Found",
+                    Success = false
+                });
+
+            return Ok(new ResponseWrapper<UserResponse>
+            {
+                Data = user,
+                Message = "Retrieved User Successfully.",
+                Success = true
+            });
         }
 
         [HttpPost]
@@ -49,11 +61,21 @@ namespace KmtBackend.API.Controllers
             {
                 var user = await _userService.CreateUserAsync(request);
 
-                return CreatedAtAction(null, new ResponseWrapper(user, "User Created Succesfully.", true));
+                return CreatedAtAction(null, new ResponseWrapper<UserResponse>
+                {
+                    Data = user,
+                    Message = "User Created Successfully.",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
+                return BadRequest(new ResponseWrapper<UserResponse>
+                {
+                    Message = "Bad Request",
+                    Success = false,
+                    Errors = [ex.Message]
+                });
             }
         }
 
@@ -65,14 +87,28 @@ namespace KmtBackend.API.Controllers
             {
                 var user = await _userService.UpdateUserAsync(id, request);
 
-                return Ok(new ResponseWrapper(user, "Updated User Successfully.", true));
+                return Ok(new ResponseWrapper<UserResponse>
+                {
+                    Data = user,
+                    Message = "Updated User Successfully.",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new ResponseWrapper(null, "User Not Found", false));
+                    return NotFound(new ResponseWrapper<UserResponse>
+                    {
+                        Message = "User Not Found",
+                        Success = false
+                    });
 
-                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
+                return BadRequest(new ResponseWrapper<UserResponse>
+                {
+                    Message = "Bad Request",
+                    Success = false,
+                    Errors = [ex.Message]
+                });
             }
         }
 
@@ -81,9 +117,13 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _userService.DeleteUserAsync(id);
-            
+
             if (!result)
-                return NotFound(new ResponseWrapper(null, "User Not Found", false));
+                return NotFound(new ResponseWrapper<UserResponse>
+                {
+                    Message = "User Not Found",
+                    Success = false
+                });
 
             return NoContent();
         }

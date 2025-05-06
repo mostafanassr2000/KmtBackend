@@ -1,6 +1,7 @@
 using KmtBackend.DAL.Context;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Models.DTOs.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace KmtBackend.DAL.Repositories
@@ -27,10 +28,23 @@ namespace KmtBackend.DAL.Repositories
         }
 
         // Get all departments
-        public async Task<IEnumerable<Department>> GetAllAsync()
+        public async Task<PaginatedResult<Department>> GetAllAsync(PaginationQuery pagination)
         {
-            // Return all departments
-            return await _context.Departments.ToListAsync();
+            var query = _context.Departments.AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query.OrderBy(d => d.Name) // Consistent sorting!
+                                   .ApplyPagination(pagination)
+                                   .ToListAsync();
+
+            return new PaginatedResult<Department>
+            {
+                Items = items,
+                TotalRecords = totalCount,
+                PageSize = pagination.PageSize,
+                PageNumber = pagination.PageNumber
+            };
         }
 
         // Create new department

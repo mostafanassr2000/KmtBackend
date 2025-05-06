@@ -1,6 +1,5 @@
 using KmtBackend.API.Attributes;
 using KmtBackend.API.Common;
-using KmtBackend.API.DTOs.Department;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.Title;
@@ -24,7 +23,12 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var titles = await _titleService.GetAllTitlesAsync();
-            return Ok(new ResponseWrapper(titles, "Retrieved Titles Successfully.", true));
+            return Ok(new ResponseWrapper<IEnumerable<TitleResponse>>
+            {
+                Data = titles,
+                Message = "Retrieved Titles Successfully.",
+                Success = true
+            });
         }
 
         [HttpGet("{id}")]
@@ -32,11 +36,20 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var title = await _titleService.GetTitleByIdAsync(id);
-            
-            if (title == null)
-                return NotFound(new ResponseWrapper(null, "Title Not Found", false));
 
-            return Ok(new ResponseWrapper(title, "Retrieved Title Successfully.", true));
+            if (title == null)
+                return NotFound(new ResponseWrapper<TitleResponse>
+                {
+                    Message = "Title Not Found",
+                    Success = false
+                });
+
+            return Ok(new ResponseWrapper<TitleResponse>
+            {
+                Data = title,
+                Message = "Retrieved Title Successfully.",
+                Success = true
+            });
         }
 
         [HttpPost]
@@ -46,11 +59,21 @@ namespace KmtBackend.API.Controllers
             try
             {
                 var title = await _titleService.CreateTitleAsync(request);
-                return CreatedAtAction(null, new ResponseWrapper(title, "Title Created Succesfully.", true));
+                return CreatedAtAction(null, new ResponseWrapper<TitleResponse>
+                {
+                    Data = title,
+                    Message = "Title Created Successfully.",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
+                return BadRequest(new ResponseWrapper<TitleResponse>
+                {
+                    Message = "Bad Request",
+                    Success = false,
+                    Errors = [ex.Message]
+                });
             }
         }
 
@@ -61,15 +84,28 @@ namespace KmtBackend.API.Controllers
             try
             {
                 var title = await _titleService.UpdateTitleAsync(id, request);
-
-                return Ok(new ResponseWrapper(title, "Title Updated Successfully.", true));
+                return Ok(new ResponseWrapper<TitleResponse>
+                {
+                    Data = title,
+                    Message = "Title Updated Successfully.",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new ResponseWrapper(null, "Title Not Found", false));
+                    return NotFound(new ResponseWrapper<TitleResponse>
+                    {
+                        Message = "Title Not Found",
+                        Success = false
+                    });
 
-                return BadRequest(new ResponseWrapper(null, "Bad Request", false, [ex.Message]));
+                return BadRequest(new ResponseWrapper<TitleResponse>
+                {
+                    Message = "Bad Request",
+                    Success = false,
+                    Errors = [ex.Message]
+                });
             }
         }
 
@@ -78,12 +114,15 @@ namespace KmtBackend.API.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _titleService.DeleteTitleAsync(id);
-            
+
             if (!result)
-                return NotFound(new ResponseWrapper(null, "Title Not Found", false));
+                return NotFound(new ResponseWrapper<TitleResponse>
+                {
+                    Message = "Title Not Found",
+                    Success = false
+                });
 
             return NoContent();
         }
     }
 }
-

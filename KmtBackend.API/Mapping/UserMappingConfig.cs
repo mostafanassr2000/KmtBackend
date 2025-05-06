@@ -4,8 +4,8 @@ using KmtBackend.API.DTOs.User;
 using Mapster;
 using System.Globalization;
 using KmtBackend.Models.DTOs.User;
-using KmtBackend.API.DTOs.Department;
 using KmtBackend.Models.DTOs.Title;
+using KmtBackend.Models.DTOs.Department;
 
 namespace KmtBackend.API.Mapping
 {

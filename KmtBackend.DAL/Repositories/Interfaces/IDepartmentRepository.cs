@@ -1,9 +1,5 @@
 using KmtBackend.DAL.Entities;
-// Domain models
-using System.Collections.Generic;
-// Collection types
-using System.Threading.Tasks;
-// Async operations
+using KmtBackend.Models.DTOs.Common;
 
 namespace KmtBackend.DAL.Repositories.Interfaces
 {
@@ -12,9 +8,9 @@ namespace KmtBackend.DAL.Repositories.Interfaces
     {
         // Get department by ID
         Task<Department?> GetByIdAsync(Guid id);
-        
+
         // Get all departments
-        Task<IEnumerable<Department>> GetAllAsync();
+        Task<PaginatedResult<Department>> GetAllAsync(PaginationQuery pagination);
         
         // Create new department
         Task<Department> CreateAsync(Department department);

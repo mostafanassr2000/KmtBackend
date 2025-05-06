@@ -2,6 +2,8 @@ using KmtBackend.API.DTOs.Department;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Department;
 using MapsterMapper;
 
 namespace KmtBackend.BLL.Managers
@@ -36,11 +38,11 @@ namespace KmtBackend.BLL.Managers
             return response;
         }
 
-        public async Task<IEnumerable<DepartmentResponse>> GetAllDepartmentsAsync()
+        public async Task<PaginatedResult<DepartmentResponse>> GetAllDepartmentsAsync(PaginationQuery pagination)
         {
-            var departments = await _departmentRepository.GetAllAsync();
+            var departments = await _departmentRepository.GetAllAsync(pagination);
             
-            var responses = _mapper.Map<IEnumerable<DepartmentResponse>>(departments).ToList();
+            var responses = _mapper.Map<IEnumerable<DepartmentResponse>>(departments.Items).ToList();
             
             var allUsers = await _userRepository.GetAllAsync();
             
@@ -48,8 +50,14 @@ namespace KmtBackend.BLL.Managers
             {
                 response.UserCount = allUsers.Count(u => u.DepartmentId == response.Id);
             }
-            
-            return responses;
+
+            return new PaginatedResult<DepartmentResponse>
+            {
+                Items = responses,
+                PageNumber = departments.PageNumber,
+                PageSize = departments.PageSize,
+                TotalRecords = departments.TotalRecords
+            };
         }
 
         public async Task<DepartmentResponse> CreateDepartmentAsync(CreateDepartmentRequest request)
@@ -74,24 +82,19 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<DepartmentResponse> UpdateDepartmentAsync(Guid id, UpdateDepartmentRequest request)
         {
-            var department = await _departmentRepository.GetByIdAsync(id);
-            
-            if (department == null)
-            {
-                throw new Exception("Department not found");
-            }
+            var department = await _departmentRepository.GetByIdAsync(id) ?? throw new Exception("Department not found");
 
-            department.Name = request.Name;
-            department.NameAr = request.NameAr;
-            department.Description = request.Description;
+            department.Name = request.Name ?? department.Name;
+            department.NameAr = request.NameAr ?? department.NameAr;
+            department.Description = request.Description ?? department.Description;
+            department.DescriptionAr = request.DescriptionAr ?? department.DescriptionAr;
             department.UpdatedAt = DateTime.UtcNow;
             
             var updatedDepartment = await _departmentRepository.UpdateAsync(department);
             
             var response = _mapper.Map<DepartmentResponse>(updatedDepartment);
-            
-            var users = await _userRepository.GetByDepartmentAsync(id);
-            response.UserCount = users.Count();
+
+            response.UserCount = department.Users.Count;
             
             return response;
         }

@@ -1,3 +1,4 @@
+using Azure;
 using KmtBackend.API.Common;
 using KmtBackend.API.DTOs.Auth;
 using KmtBackend.BLL.Managers.Interfaces;
@@ -22,12 +23,20 @@ namespace KmtBackend.API.Controllers
             try
             {
                 var response = await _authService.LoginAsync(request);
-                
-                return Ok(new ResponseWrapper(response, "Logged In Successfully!", true));
+                return Ok(new ResponseWrapper<LoginResponse>
+                {
+                    Data = response,
+                    Message = "Logged In Successfully!",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(new ResponseWrapper<LoginResponse>
+                {
+                    Message = "Invalid Credentials",
+                    Success = false
+                });
             }
         }
     }

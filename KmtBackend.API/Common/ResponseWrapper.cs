@@ -1,10 +1,16 @@
 ﻿namespace KmtBackend.API.Common
 {
-    public class ResponseWrapper(object? data, string message, bool success, List<string>? errors = null)
+    public class ResponseWrapper<T>
     {
-        public object? Data { get; } = data;
-        public string Message { get; } = message;
-        public bool Success { get; } = success;
-        public List<string>? Errors { get; } = errors;
+        public T? Data { get; set; }
+        public required string Message { get; set; }
+        public bool Success { get; set; }
+        public List<string>? Errors { get; set; }
+
+
+        // Optional pagination fields
+        public int? PageNumber { get; set; }
+        public int? PageSize { get; set; }
+        public int? TotalRecords { get; set; }
     }
 }
