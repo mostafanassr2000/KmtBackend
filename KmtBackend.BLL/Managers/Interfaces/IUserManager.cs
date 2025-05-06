@@ -1,4 +1,5 @@
 using KmtBackend.API.DTOs.User;
+using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.User;
 
 namespace KmtBackend.BLL.Managers.Interfaces
@@ -10,7 +11,10 @@ namespace KmtBackend.BLL.Managers.Interfaces
         Task<UserResponse?> GetUserByIdAsync(Guid id);
         
         Task<IEnumerable<UserResponse>> GetAllUsersAsync();
-        
+
+        Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination);
+
+
         Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request);
         
         Task<bool> DeleteUserAsync(Guid id);

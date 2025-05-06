@@ -2,6 +2,7 @@ using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.User;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -55,6 +56,21 @@ namespace KmtBackend.BLL.Managers
             var users = await _userRepository.GetAllAsync();
             
             return _mapper.Map<IEnumerable<UserResponse>>(users);
+        }
+
+        public async Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination)
+        {
+            var roles = await _userRepository.GetAllPaginatedAsync(pagination);
+
+            var responses = _mapper.Map<IEnumerable<UserResponse>>(roles.Items).ToList();
+
+            return new PaginatedResult<UserResponse>
+            {
+                Items = responses,
+                PageNumber = roles.PageNumber,
+                PageSize = roles.PageSize,
+                TotalRecords = roles.TotalRecords
+            };
         }
 
         public async Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request)

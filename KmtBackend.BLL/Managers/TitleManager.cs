@@ -1,7 +1,9 @@
-using KmtBackend.API.DTOs.Department;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Entities;
+using KmtBackend.DAL.Repositories;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Role;
 using KmtBackend.Models.DTOs.Title;
 using MapsterMapper;
 
@@ -51,6 +53,28 @@ namespace KmtBackend.BLL.Managers
             }
             
             return responses;
+        }
+
+        public async Task<PaginatedResult<TitleResponse>> GetAllTitlesPaginatedAsync(PaginationQuery pagination)
+        {
+            var roles = await _titleRepository.GetAllPaginatedAsync(pagination);
+
+            var responses = _mapper.Map<IEnumerable<TitleResponse>>(roles.Items).ToList();
+
+            var allUsers = await _userRepository.GetAllAsync();
+
+            foreach (var response in responses)
+            {
+                response.UserCount = allUsers.Count(u => u.TitleId == response.Id);
+            }
+
+            return new PaginatedResult<TitleResponse>
+            {
+                Items = responses,
+                PageNumber = roles.PageNumber,
+                PageSize = roles.PageSize,
+                TotalRecords = roles.TotalRecords
+            };
         }
 
         public async Task<TitleResponse> CreateTitleAsync(CreateTitleRequest request)

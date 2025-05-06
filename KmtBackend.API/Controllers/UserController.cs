@@ -3,6 +3,8 @@ using KmtBackend.API.Common;
 using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Role;
 using KmtBackend.Models.DTOs.User;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,14 +23,17 @@ namespace KmtBackend.API.Controllers
 
         [HttpGet]
         [RequirePermission(Permissions.ViewUsers)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _userService.GetAllUsersPaginatedAsync(pagination);
             return Ok(new ResponseWrapper<IEnumerable<UserResponse>>
             {
-                Data = users,
-                Message = "Retrieved Users Successfully.",
-                Success = true
+                Data = users.Items,
+                Message = "Retrieved Roles Successfully.",
+                Success = true,
+                PageNumber = users.PageNumber,
+                PageSize = users.PageSize,
+                TotalRecords = users.TotalRecords
             });
         }
 

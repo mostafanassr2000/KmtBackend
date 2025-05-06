@@ -4,6 +4,8 @@ using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.Role;
 using KmtBackend.API.Common;
 using Microsoft.AspNetCore.Mvc;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Department;
 
 namespace KmtBackend.API.Controllers
 {
@@ -20,14 +22,17 @@ namespace KmtBackend.API.Controllers
 
         [HttpGet]
         [RequirePermission(Permissions.ViewRoles)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var roles = await _roleManager.GetAllRolesAsync();
+            var roles = await _roleManager.GetAllRolesPaginatedAsync(pagination);
             return Ok(new ResponseWrapper<IEnumerable<RoleResponse>>
             {
-                Data = roles,
+                Data = roles.Items,
                 Message = "Retrieved Roles Successfully.",
-                Success = true
+                Success = true,
+                PageNumber = roles.PageNumber,
+                PageSize = roles.PageSize,
+                TotalRecords = roles.TotalRecords
             });
         }
 

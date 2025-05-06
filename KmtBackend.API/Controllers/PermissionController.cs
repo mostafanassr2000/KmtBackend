@@ -4,6 +4,8 @@ using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.Permission;
 using KmtBackend.API.Common;
 using Microsoft.AspNetCore.Mvc;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Department;
 
 namespace KmtBackend.API.Controllers
 {
@@ -20,14 +22,17 @@ namespace KmtBackend.API.Controllers
 
         [HttpGet]
         [RequirePermission(Permissions.ViewPermissions)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var permissions = await _permissionManager.GetAllPermissionsAsync();
+            var permissions = await _permissionManager.GetAllPermissionsPaginatedAsync(pagination);
             return Ok(new ResponseWrapper<IEnumerable<PermissionResponse>>
             {
-                Data = permissions,
+                Data = permissions.Items,
                 Message = "Retrieved Permissions Successfully.",
-                Success = true
+                Success = true,
+                PageNumber = permissions.PageNumber,
+                PageSize = permissions.PageSize,
+                TotalRecords = permissions.TotalRecords
             });
         }
 

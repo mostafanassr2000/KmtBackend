@@ -2,6 +2,8 @@ using KmtBackend.API.Attributes;
 using KmtBackend.API.Common;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
+using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.DTOs.Role;
 using KmtBackend.Models.DTOs.Title;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,14 +22,17 @@ namespace KmtBackend.API.Controllers
 
         [HttpGet]
         [RequirePermission(Permissions.ViewTitles)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var titles = await _titleService.GetAllTitlesAsync();
+            var roles = await _titleService.GetAllTitlesPaginatedAsync(pagination);
             return Ok(new ResponseWrapper<IEnumerable<TitleResponse>>
             {
-                Data = titles,
+                Data = roles.Items,
                 Message = "Retrieved Titles Successfully.",
-                Success = true
+                Success = true,
+                PageNumber = roles.PageNumber,
+                PageSize = roles.PageSize,
+                TotalRecords = roles.TotalRecords
             });
         }
 
