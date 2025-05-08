@@ -84,28 +84,27 @@ namespace KmtBackend.BLL.Managers
         {
             var role = await _roleRepository.GetByIdAsync(id) ?? throw new Exception("Role not found");
 
-            if (request.Name != role.Name && await _roleRepository.NameExistsAsync(request.Name))
+            if (request.Name != null && request.Name != role.Name && await _roleRepository.NameExistsAsync(request.Name))
             {
                 throw new Exception("Role name already exists");
             }
             
-            role.Name = request.Name;
-            role.NameAr = request.NameAr;
-            role.Description = request.Description;
-            role.DescriptionAr = request.DescriptionAr;
+            role.Name = request.Name ?? role.Name;
+            role.NameAr = request.NameAr ?? role.NameAr;
+            role.Description = request.Description ?? role.Description;
+            role.DescriptionAr = request.DescriptionAr ?? role.DescriptionAr;
             role.UpdatedAt = DateTime.UtcNow;         
             
             if (request.PermissionIds != null)
             {
                 var newPermissions = await _permissionRepository.GetByIdsAsync(request.PermissionIds);
-                role.Permissions = newPermissions.ToList();
+                role.Permissions.Clear();
+                role.Permissions = [.. newPermissions];
             }
 
-            var updatedRole = request.PermissionIds == null
-                ? await _roleRepository.UpdateAsync(role)
-                : await _roleRepository.GetWithPermissionsAsync(id);
+            var updatedRole = await _roleRepository.UpdateAsync(role);
 
-            return _mapper.Map<RoleResponse>(updatedRole);
+            return _mapper.Map<RoleResponse>(updatedRole!);
         }
         
         public async Task<bool> DeleteRoleAsync(Guid id)

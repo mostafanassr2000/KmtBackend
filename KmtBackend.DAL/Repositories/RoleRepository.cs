@@ -29,8 +29,9 @@ namespace KmtBackend.DAL.Repositories
             var totalCount = await query.CountAsync();
 
             var items = await query.OrderBy(r => r.Name)
-                                   .ApplyPagination(pagination)
-                                   .ToListAsync();
+                .Include(r => r.Permissions)
+                .ApplyPagination(pagination)
+                .ToListAsync();
 
             return new PaginatedResult<Role>
             {
@@ -44,7 +45,9 @@ namespace KmtBackend.DAL.Repositories
         public async Task<Role?> GetByIdAsync(Guid id)
         {
             return await _context.Roles
-                .FirstOrDefaultAsync(r => r.Id == id);
+                .Where(r => r.Id == id)
+                .Include(r => r.Permissions)
+                .FirstOrDefaultAsync();
         }
         public async Task<Role?> GetByNameAsync(string name)
         {

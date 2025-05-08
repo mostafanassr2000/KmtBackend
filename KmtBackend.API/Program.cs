@@ -107,6 +107,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<LocalizationMiddleware>();
 
+app.UseExceptionHandler("/error");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
