@@ -130,36 +130,36 @@ namespace KmtBackend.API.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id:guid}/permissions")]
-        [RequirePermission(Permissions.AssignPermissions)]
-        public async Task<IActionResult> AssignPermissions(Guid id, AssignPermissionsRequest request)
-        {
-            try
-            {
-                var role = await _roleManager.AssignPermissionsAsync(id, request);
-                return Ok(new ResponseWrapper<RoleResponse>
-                {
-                    Data = role,
-                    Message = "Assigned Permissions Successfully.",
-                    Success = true
-                });
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new ResponseWrapper<RoleResponse>
-                    {
-                        Message = "Role Not Found",
-                        Success = false
-                    });
+        //[HttpPost("{id:guid}/permissions")]
+        //[RequirePermission(Permissions.AssignPermissions)]
+        //public async Task<IActionResult> AssignPermissions(Guid id, AssignPermissionsRequest request)
+        //{
+        //    try
+        //    {
+        //        var role = await _roleManager.AssignPermissionsAsync(id, request);
+        //        return Ok(new ResponseWrapper<RoleResponse>
+        //        {
+        //            Data = role,
+        //            Message = "Assigned Permissions Successfully.",
+        //            Success = true
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        if (ex.Message.Contains("not found"))
+        //            return NotFound(new ResponseWrapper<RoleResponse>
+        //            {
+        //                Message = "Role Not Found",
+        //                Success = false
+        //            });
 
-                return BadRequest(new ResponseWrapper<RoleResponse>
-                {
-                    Message = "Bad Request",
-                    Success = false,
-                    Errors = [ex.Message]
-                });
-            }
-        }
+        //        return BadRequest(new ResponseWrapper<RoleResponse>
+        //        {
+        //            Message = "Bad Request",
+        //            Success = false,
+        //            Errors = [ex.Message]
+        //        });
+        //    }
+        //}
     }
 }

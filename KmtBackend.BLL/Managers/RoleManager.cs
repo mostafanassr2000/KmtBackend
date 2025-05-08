@@ -112,26 +112,26 @@ namespace KmtBackend.BLL.Managers
             return await _roleRepository.DeleteAsync(id);
         }
 
-        public async Task<RoleResponse> AssignPermissionsAsync(Guid id, AssignPermissionsRequest request)
-        {
-            var role = await _roleRepository.GetByIdAsync(id) ?? throw new Exception("Role not found");
+        //public async Task<RoleResponse> AssignPermissionsAsync(Guid id, AssignPermissionsRequest request)
+        //{
+        //    var role = await _roleRepository.GetByIdAsync(id) ?? throw new Exception("Role not found");
 
-            if (request.PermissionIds.Count != 0)
-            {
-                var permissions = await _permissionRepository.GetByIdsAsync(request.PermissionIds);
-                var foundPermissionIds = permissions.Select(p => p.Id).ToList();
+        //    if (request.PermissionIds.Count != 0)
+        //    {
+        //        var permissions = await _permissionRepository.GetByIdsAsync(request.PermissionIds);
+        //        var foundPermissionIds = permissions.Select(p => p.Id).ToList();
                 
-                var notFoundIds = request.PermissionIds.Except(foundPermissionIds).ToList();
-                if (notFoundIds.Count != 0)
-                {
-                    throw new Exception($"Some permissions were not found: {string.Join(", ", notFoundIds)}");
-                }
-                await _roleRepository.AssignPermissionsAsync(id, permissions.ToList());
-            }
+        //        var notFoundIds = request.PermissionIds.Except(foundPermissionIds).ToList();
+        //        if (notFoundIds.Count != 0)
+        //        {
+        //            throw new Exception($"Some permissions were not found: {string.Join(", ", notFoundIds)}");
+        //        }
+        //        await _roleRepository.AssignPermissionsAsync(id, permissions.ToList());
+        //    }
             
-            var updatedRole = await _roleRepository.GetWithPermissionsAsync(id) ?? throw new Exception("Role not found after update");
+        //    var updatedRole = await _roleRepository.GetWithPermissionsAsync(id) ?? throw new Exception("Role not found after update");
 
-            return _mapper.Map<RoleResponse>(updatedRole);
-        }
+        //    return _mapper.Map<RoleResponse>(updatedRole);
+        //}
     }
 }

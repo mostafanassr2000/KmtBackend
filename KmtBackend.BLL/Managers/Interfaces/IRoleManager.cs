@@ -11,6 +11,6 @@ namespace KmtBackend.BLL.Managers.Interfaces
         Task<RoleResponse> CreateRoleAsync(CreateRoleRequest request);
         Task<RoleResponse> UpdateRoleAsync(Guid id, UpdateRoleRequest request);
         Task<bool> DeleteRoleAsync(Guid id);
-        Task<RoleResponse> AssignPermissionsAsync(Guid id, AssignPermissionsRequest request);
+        //Task<RoleResponse> AssignPermissionsAsync(Guid id, AssignPermissionsRequest request);
     }
 }
