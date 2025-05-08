@@ -1,4 +1,3 @@
-using KmtBackend.API.DTOs.User;
 using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.User;
 

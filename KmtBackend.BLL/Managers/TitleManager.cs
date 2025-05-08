@@ -100,9 +100,10 @@ namespace KmtBackend.BLL.Managers
         public async Task<TitleResponse> UpdateTitleAsync(Guid id, UpdateTitleRequest request)
         {
             var title = await _titleRepository.GetByIdAsync(id) ?? throw new Exception("Title not found");
-            title.Name = request.Name;
-            title.NameAr = request.NameAr;
-            title.Description = request.Description;
+            title.Name = request.Name ?? title.Name;
+            title.NameAr = request.NameAr ?? title.NameAr;
+            title.Description = request.Description ?? title.Description;
+            title.DescriptionAr = request.DescriptionAr ?? title.DescriptionAr;
             title.UpdatedAt = DateTime.UtcNow;
             
             var updatedTitle = await _titleRepository.UpdateAsync(title);

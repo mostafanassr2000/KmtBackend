@@ -1,17 +1,14 @@
 namespace KmtBackend.Models.DTOs.Title
 {
-    // Create title request
     public class CreateTitleRequest
     {
-        // Department name (English)
         public string Name { get; set; } = null!;
 
-        // Department name (Arabic)
-        public string? NameAr { get; set; }
+        public string NameAr { get; set; } = null!;
 
-        // Optional description
-        public string? Description { get; set; }
-        public string? DescriptionAr { get; set; }
+        public string Description { get; set; } = null!;
+
+        public string DescriptionAr { get; set; } = null!;
     }
 }
 

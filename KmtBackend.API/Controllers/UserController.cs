@@ -1,6 +1,5 @@
 using KmtBackend.API.Attributes;
 using KmtBackend.API.Common;
-using KmtBackend.API.DTOs.User;
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.Common;
