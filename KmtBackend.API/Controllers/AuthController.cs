@@ -2,6 +2,7 @@ using Azure;
 using KmtBackend.API.Common;
 using KmtBackend.API.DTOs.Auth;
 using KmtBackend.BLL.Managers.Interfaces;
+using KmtBackend.Models.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KmtBackend.API.Controllers

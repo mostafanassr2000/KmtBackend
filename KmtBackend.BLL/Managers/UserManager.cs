@@ -1,6 +1,7 @@
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
+using KmtBackend.Infrastructure.Helpers;
 using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.User;
 using MapsterMapper;
@@ -97,7 +98,10 @@ namespace KmtBackend.BLL.Managers
             user.Email = request.Email ?? user.Email;
             user.TitleId = request.TitleId ?? user.TitleId;
             user.DepartmentId = request.DepartmentId ?? user.DepartmentId;
-            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            if (request.PhoneNumber != null)
+            {
+                user.PhoneNumber = PhoneNumberHelper.Normalize(request.PhoneNumber ?? "");
+            }
             
             //if (!string.IsNullOrEmpty(request.Password))
             //{

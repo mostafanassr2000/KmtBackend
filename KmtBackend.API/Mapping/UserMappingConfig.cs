@@ -5,13 +5,12 @@ using System.Globalization;
 using KmtBackend.Models.DTOs.User;
 using KmtBackend.Models.DTOs.Title;
 using KmtBackend.Models.DTOs.Department;
+using KmtBackend.Infrastructure.Helpers;
 
 namespace KmtBackend.API.Mapping
 {
-    // Mapping configuration for User entities
     public class UserMappingConfig : IRegister
     {
-        // Register mappings with Mapster
         public void Register(TypeAdapterConfig config)
         {
             // User to UserResponse mapping
@@ -75,10 +74,9 @@ namespace KmtBackend.API.Mapping
 
             // CreateUserRequest to User mapping
             config.NewConfig<CreateUserRequest, User>()
-                // Don't map password directly - it's handled in service
                 .Ignore(dest => dest.PasswordHash)
-                // Set creation timestamp
-                .Map(dest => dest.CreatedAt, src => DateTime.UtcNow);
+                .Map(dest => dest.CreatedAt, src => DateTime.UtcNow)
+                .Map(dest => dest.PhoneNumber, src => PhoneNumberHelper.Normalize(src.PhoneNumber ?? ""));
         }
     }
 }

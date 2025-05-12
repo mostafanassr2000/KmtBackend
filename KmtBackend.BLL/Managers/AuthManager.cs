@@ -9,6 +9,8 @@ using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.Infrastructure.TokenGenerator;
 using Microsoft.AspNetCore.Identity;
 using KmtBackend.DAL.Entities;
+using KmtBackend.Models.DTOs.Auth;
+using KmtBackend.Infrastructure.Helpers;
 
 namespace KmtBackend.BLL.Managers
 {
@@ -35,8 +37,17 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email);
+            User? user = null;
 
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                user = await _userRepository.GetByEmailAsync(request.Email);
+            }
+            else if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                string normalizedPhoneNumber = PhoneNumberHelper.Normalize(request.PhoneNumber);
+                user = await _userRepository.GetByPhoneNumberAsync(normalizedPhoneNumber);
+            }
             if (user == null)
             {
                 throw new Exception("Invalid credentials");

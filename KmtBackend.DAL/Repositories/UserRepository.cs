@@ -33,6 +33,16 @@ namespace KmtBackend.DAL.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<User?> GetByPhoneNumberAsync(string phoneNumber)
+        {
+            return await _context.Users
+                .Where(u => u.PhoneNumber.ToLower() == phoneNumber.ToLower())
+                .Include(u => u.Roles)
+                .ThenInclude(rp => rp.Permissions)
+                .Include(u => u.Department)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<User?> GetByUsernameAsync(string username)
         {
             return await _context.Users

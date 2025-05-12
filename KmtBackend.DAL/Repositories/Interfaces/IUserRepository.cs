@@ -8,7 +8,9 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         Task<User?> GetByIdAsync(Guid id);
         
         Task<User?> GetByEmailAsync(string email);
-        
+
+        Task<User?> GetByPhoneNumberAsync(string phoneNumber);
+
         Task<User?> GetByUsernameAsync(string username);
         
         Task<IEnumerable<User>> GetAllAsync();
