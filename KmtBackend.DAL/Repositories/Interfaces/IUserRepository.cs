@@ -28,7 +28,9 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         Task<bool> DeleteAsync(Guid id);
         
         Task<bool> EmailExistsAsync(string email);
-       
+
+        Task<bool> PhoneNumberExistsAsync(string phoneNumber);
+
         Task<bool> UsernameExistsAsync(string username);
 
         Task<User?> GetUserWithRolesAsync(Guid id);

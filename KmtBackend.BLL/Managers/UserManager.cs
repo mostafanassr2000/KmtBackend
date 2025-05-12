@@ -24,14 +24,28 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
         {
-            if (await _userRepository.EmailExistsAsync(request.Email))
+            if (!string.IsNullOrWhiteSpace(request.Email))
             {
-                throw new Exception("Email already exists");
+                if (await _userRepository.EmailExistsAsync(request.Email))
+                {
+                    throw new Exception("Email already exists");
+                }
             }
 
-            if (await _userRepository.UsernameExistsAsync(request.Username))
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
             {
-                throw new Exception("Username already exists");
+                if (await _userRepository.PhoneNumberExistsAsync(PhoneNumberHelper.Normalize(request.PhoneNumber)))
+                {
+                    throw new Exception("Phone number already exists");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Username))
+            {
+                if (await _userRepository.UsernameExistsAsync(request.Username))
+                {
+                    throw new Exception("Username already exists");
+                }
             }
 
             var user = _mapper.Map<User>(request);

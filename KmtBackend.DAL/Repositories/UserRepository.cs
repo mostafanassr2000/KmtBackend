@@ -121,6 +121,12 @@ namespace KmtBackend.DAL.Repositories
                 .AnyAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
+        public async Task<bool> PhoneNumberExistsAsync(string phoneNumber)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.PhoneNumber == phoneNumber);
+        }
+
         public async Task<bool> UsernameExistsAsync(string username)
         {
             return await _context.Users
