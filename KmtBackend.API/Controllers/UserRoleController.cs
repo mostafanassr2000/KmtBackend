@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace KmtBackend.API.Controllers
 {
     [ApiController]
-    [Route("api/User/{userId:guid}/roles")]
+    [Route("api/User/{userId:guid}/Roles")]
     public class UserRoleController : ControllerBase
     {
         private readonly IUserRoleManager _userRoleManager;

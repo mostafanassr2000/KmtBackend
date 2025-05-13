@@ -14,12 +14,14 @@ namespace KmtBackend.BLL.Managers
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly ILeaveBalanceManager _leaveBalanceManager;
 
-        public UserManager(IUserRepository userRepository, IMapper mapper)
+        public UserManager(IUserRepository userRepository, IMapper mapper, ILeaveBalanceManager leaveBalanceManager)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _passwordHasher = new PasswordHasher<User>();
+            _leaveBalanceManager = leaveBalanceManager;
         }
 
         public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
@@ -52,7 +54,9 @@ namespace KmtBackend.BLL.Managers
             user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
             var createdUser = await _userRepository.CreateAsync(user);
-            
+
+            await _leaveBalanceManager.CreateInitialBalancesForUserAsync(createdUser.Id);
+
             return _mapper.Map<UserResponse>(createdUser);
         }
 
@@ -89,29 +93,39 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-            
-            if (user == null)
+            var user = await _userRepository.GetByIdAsync(id) ?? throw new Exception("User not found");
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
             {
-                throw new Exception("User not found");
+                if (await _userRepository.EmailExistsAsync(request.Email))
+                {
+                    throw new Exception("Email already exists");
+                }
             }
 
-            //if (request.Email != user.Email && 
-            //    await _userRepository.EmailExistsAsync(request.Email))
-            //{
-            //    throw new Exception("Email already exists");
-            //}
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                if (await _userRepository.PhoneNumberExistsAsync(PhoneNumberHelper.Normalize(request.PhoneNumber)))
+                {
+                    throw new Exception("Phone number already exists");
+                }
+            }
 
-            //if (request.Username != user.Username && 
-            //    await _userRepository.UsernameExistsAsync(request.Username))
-            //{
-            //    throw new Exception("Username already exists");
-            //}
+            if (!string.IsNullOrWhiteSpace(request.Username))
+            {
+                if (await _userRepository.UsernameExistsAsync(request.Username))
+                {
+                    throw new Exception("Username already exists");
+                }
+            }
 
             user.Username = request.Username ?? user.Username;
             user.Email = request.Email ?? user.Email;
             user.TitleId = request.TitleId ?? user.TitleId;
             user.DepartmentId = request.DepartmentId ?? user.DepartmentId;
+            user.TerminationDate = request.TerminationDate ?? user.TerminationDate;
+            user.HireDate = request.HireDate ?? user.HireDate;
+            user.PriorWorkExperienceMonths = request.PriorWorkExperienceMonths ?? user.PriorWorkExperienceMonths;
             if (request.PhoneNumber != null)
             {
                 user.PhoneNumber = PhoneNumberHelper.Normalize(request.PhoneNumber ?? "");

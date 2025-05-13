@@ -14,5 +14,8 @@ namespace KmtBackend.Models.DTOs.User
         public Guid? TitleId { get; set; }
         
         public Guid? DepartmentId { get; set; }
+
+        public DateTime HireDate { get; set; }
+        public int PriorWorkExperienceMonths { get; set; }
     }
 }
