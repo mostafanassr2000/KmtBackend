@@ -34,7 +34,7 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<LeaveBalanceResponse>(leaveBalance);
         }
 
-        public async Task<IEnumerable<LeaveBalanceResponse>> GetUserLeaveBalancesPaginatedAsync(Guid userId, int? year)
+        public async Task<IEnumerable<LeaveBalanceResponse>> GetUserLeaveBalancesAsync(Guid userId, int? year)
         {
             var balances = await _leaveBalanceRepository.GetByUserIdAsync(userId, year);
                 

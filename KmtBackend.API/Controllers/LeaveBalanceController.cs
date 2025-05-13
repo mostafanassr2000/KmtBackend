@@ -19,9 +19,9 @@ namespace KmtBackend.API.Controllers
         
         [HttpGet("User/{userId}")]
         //[RequirePermission(Permissions.ViewLeaveBalances)]
-        public async Task<IActionResult> GetUserBalances(Guid userId, [FromQuery] int? year, [FromQuery] PaginationQuery pagination)
+        public async Task<IActionResult> GetUserBalances(Guid userId, [FromQuery] int? year)
         {
-            var result = await _leaveBalanceManager.GetUserLeaveBalancesPaginatedAsync(userId, year);
+            var result = await _leaveBalanceManager.GetUserLeaveBalancesAsync(userId, year);
             
             return Ok(new ResponseWrapper<IEnumerable<LeaveBalanceResponse>>
             {
