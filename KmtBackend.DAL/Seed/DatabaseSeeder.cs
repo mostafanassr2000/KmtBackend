@@ -144,9 +144,10 @@ namespace KmtBackend.DAL.Seed
                 Username = "admin",
                 Email = "admin@admin.com",
                 CreatedAt = DateTime.UtcNow,
-                PhoneNumber = "+201010101010",
+                PhoneNumber = "1010101010",
                 PriorWorkExperienceMonths = 24,
-                HireDate = DateTime.UtcNow
+                HireDate = DateTime.UtcNow,
+                Gender = Models.Enums.Gender.Male
             };
 
             superAdmin.PasswordHash = passwordHasher.HashPassword(superAdmin, "Admin@123");
@@ -194,6 +195,11 @@ namespace KmtBackend.DAL.Seed
                         DescriptionAr = leaveType.Value.DescriptionAr,
                         IsSeniorityBased = leaveType.Value.IsSeniorityBased,
                         AllowCarryOver = leaveType.Value.AllowCarryOver,
+                        IsGenderSpecific = leaveType.Value.IsGenderSpecific,
+                        ApplicableGender = leaveType.Value.ApplicableGender,
+                        IsLimitedFrequency = leaveType.Value.IsLimitedFrequency,
+                        MinServiceMonths = leaveType.Value.MinServiceMonths,
+                        MaxUses = leaveType.Value.MaxUses,
                         CreatedAt = DateTime.UtcNow
                     });
                 }

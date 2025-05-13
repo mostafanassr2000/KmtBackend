@@ -1,8 +1,7 @@
-﻿namespace KmtBackend.DAL.Constants
+﻿using KmtBackend.Models.Enums;
+
+namespace KmtBackend.DAL.Constants
 {
-    /// <summary>
-    /// Static class that defines all leave-related constants according to Egyptian labor law
-    /// </summary>
     public static class LeaveConstants
     {
         #region Leave Types
@@ -26,131 +25,105 @@
 
         #region Egyptian Labor Law Entitlement Rules
 
-        /// <summary>
-        /// Years threshold for senior status
-        /// </summary>
         public const int SeniorityYearsThreshold = 10;
 
-        /// <summary>
-        /// Regular annual leave days for junior employees (less than 10 years)
-        /// </summary>
         public const int JuniorRegularLeaveDays = 15;
 
-        /// <summary>
-        /// Regular annual leave days for senior employees (10+ years)
-        /// </summary>
         public const int SeniorRegularLeaveDays = 24;
 
-        /// <summary>
-        /// Casual leave days for junior employees
-        /// </summary>
         public const int JuniorCasualLeaveDays = 6;
 
-        /// <summary>
-        /// Casual leave days for senior employees
-        /// </summary>
         public const int SeniorCasualLeaveDays = 6;
 
-        /// <summary>
-        /// Maximum sick leave days per year
-        /// </summary>
         public const int SickLeaveDays = 180;
 
-        /// <summary>
-        /// Maternity leave days
-        /// </summary>
         public const int MaternityLeaveDays = 90;
 
-        /// <summary>
-        /// Bereavement leave days
-        /// </summary>
-        public const int BereavementLeaveDays = 3;
+        //public const int BereavementLeaveDays = 3;
 
-        /// <summary>
-        /// Marriage leave days
-        /// </summary>
-        public const int MarriageLeaveDays = 3;
+        //public const int MarriageLeaveDays = 3;
 
-        /// <summary>
-        /// Pilgrimage leave days
-        /// </summary>
         public const int PilgrimageLeaveDays = 30;
 
         #endregion
 
-        /// <summary>
-        /// Gets all leave types with their descriptions and properties
-        /// </summary>
-        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver)> GetAllLeaveTypes()
+        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver, bool IsGenderSpecific, Gender? ApplicableGender, bool IsLimitedFrequency, int? MinServiceMonths, int? MaxUses)> GetAllLeaveTypes()
         {
-            return new Dictionary<string, (string, string, string, bool, bool)>
+            return new Dictionary<string, (string, string, string, bool, bool, bool, Gender?, bool, int?, int?)>
             {
                 [RegularAnnualLeave] = (
                     "إجازة اعتيادية",
                     "Regular annual leave based on seniority",
                     "الإجازة السنوية الاعتيادية حسب الأقدمية",
-                    true,
-                    true
+                    true,   // IsSeniorityBased
+                    true,   // AllowCarryOver
+                    false,  // IsGenderSpecific
+                    null,   // ApplicableGender
+                    false,  // IsLimitedFrequency
+                    null,   // MinServiceYears
+                    null    // MaxUses
                 ),
                 [CasualLeave] = (
                     "إجازة عارضة",
                     "Emergency leave for unexpected circumstances",
                     "إجازة طارئة للظروف غير المتوقعة",
-                    false,
-                    false
+                    false, false, false, null, false, null, null
                 ),
                 [SickLeave] = (
                     "إجازة مرضية",
                     "Leave for illness and medical reasons",
                     "إجازة للمرض والأسباب الطبية",
-                    false,
-                    false
+                    false, false, false, null, false, null, null
                 ),
                 [MaternityLeave] = (
                     "إجازة أمومة",
                     "Leave for childbirth and recovery",
                     "إجازة للولادة والتعافي",
-                    false,
-                    false
+                    false,              // IsSeniorityBased
+                    false,              // AllowCarryOver
+                    true,               // IsGenderSpecific
+                    Gender.Female,      // ApplicableGender
+                    true,               // IsLimitedFrequency
+                    10,                  // MinServiceMonths (10 months)
+                    2                   // MaxUses (max 2 maternity leaves)
                 ),
-                [MarriageLeave] = (
-                    "إجازة زواج",
-                    "Leave for employee's marriage",
-                    "إجازة لزواج الموظف",
-                    false,
-                    false
-                ),
-                [BereavementLeave] = (
-                    "إجازة وفاة",
-                    "Compassionate leave for death of immediate family",
-                    "إجازة لوفاة أحد أفراد العائلة المباشرة",
-                    false,
-                    false
-                ),
+                //[MarriageLeave] = (
+                //    "إجازة زواج",
+                //    "Leave for employee's marriage",
+                //    "إجازة لزواج الموظف",
+                //    false, false, false, null, false, null, null
+                //),
+                //[BereavementLeave] = (
+                //    "إجازة وفاة",
+                //    "Compassionate leave for death of immediate family",
+                //    "إجازة لوفاة أحد أفراد العائلة المباشرة",
+                //    false, false, false, null, false, null, null
+                //),
                 [PilgrimageLeave] = (
                     "إجازة حج",
                     "Leave for religious pilgrimage",
                     "إجازة لأداء فريضة الحج",
-                    false,
-                    false
+                    false,              // IsSeniorityBased
+                    false,              // AllowCarryOver
+                    false,              // IsGenderSpecific
+                    null,               // ApplicableGender
+                    true,               // IsLimitedFrequency
+                    60,                  // MinServiceMonths (5 years minimum service)
+                    1                   // MaxUses (only once per employer)
                 )
             };
         }
 
-        /// <summary>
-        /// Gets the default entitlement days for each leave type
-        /// </summary>
         public static Dictionary<string, int> GetDefaultEntitlementDays()
         {
             return new Dictionary<string, int>
             {
-                // These are just initial values, actual calculation will consider seniority
-                [RegularAnnualLeave] = JuniorRegularLeaveDays, // Will be overridden based on seniority
-                [CasualLeave] = JuniorCasualLeaveDays,         // Will be overridden based on seniority
+                [RegularAnnualLeave] = JuniorRegularLeaveDays,
+                [CasualLeave] = JuniorCasualLeaveDays,
                 [SickLeave] = SickLeaveDays,
                 [MaternityLeave] = MaternityLeaveDays,
-                [MarriageLeave] = MarriageLeaveDays,
-                [BereavementLeave] = BereavementLeaveDays,
+                //[MarriageLeave] = MarriageLeaveDays,
+                //[BereavementLeave] = BereavementLeaveDays,
                 [PilgrimageLeave] = PilgrimageLeaveDays
             };
         }

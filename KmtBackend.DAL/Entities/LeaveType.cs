@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using KmtBackend.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace KmtBackend.DAL.Entities
 {
@@ -18,11 +19,19 @@ namespace KmtBackend.DAL.Entities
         [MaxLength(250)]
         public string? DescriptionAr { get; set; }
 
-        // Whether this type increases with seniority (like annual leave)
         public bool IsSeniorityBased { get; set; }
 
-        // Whether leave balance of this type can carry over to next year
         public bool AllowCarryOver { get; set; }
+
+        public bool IsGenderSpecific { get; set; }
+
+        public Gender? ApplicableGender { get; set; }
+
+        public bool IsLimitedFrequency { get; set; }
+
+        public int? MinServiceMonths { get; set; }
+
+        public int? MaxUses { get; set; }
 
         // Navigation properties
         public virtual ICollection<LeaveBalance> LeaveBalances { get; set; } = [];

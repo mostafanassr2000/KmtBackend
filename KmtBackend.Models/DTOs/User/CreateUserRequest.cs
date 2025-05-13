@@ -1,3 +1,5 @@
+using KmtBackend.Models.Enums;
+
 namespace KmtBackend.Models.DTOs.User
 {
     public class CreateUserRequest
@@ -17,5 +19,6 @@ namespace KmtBackend.Models.DTOs.User
 
         public DateTime HireDate { get; set; }
         public int PriorWorkExperienceMonths { get; set; }
+        public Gender Gender { get; set; }
     }
 }

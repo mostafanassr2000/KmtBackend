@@ -1,6 +1,7 @@
 using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.DAL.Constants;
 using KmtBackend.DAL.Entities;
+using KmtBackend.DAL.Repositories;
 using KmtBackend.DAL.Repositories.Interfaces;
 using KmtBackend.Models.DTOs.Leave;
 using MapsterMapper;
@@ -12,18 +13,21 @@ namespace KmtBackend.BLL.Managers
         private readonly ILeaveBalanceRepository _leaveBalanceRepository;
         private readonly ILeaveTypeRepository _leaveTypeRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IMapper _mapper;
 
         public LeaveBalanceManager(
             ILeaveBalanceRepository leaveBalanceRepository,
             ILeaveTypeRepository leaveTypeRepository,
             IUserRepository userRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILeaveRequestRepository leaveRequestRepository)
         {
             _leaveBalanceRepository = leaveBalanceRepository;
             _leaveTypeRepository = leaveTypeRepository;
             _userRepository = userRepository;
             _mapper = mapper;
+            _leaveRequestRepository = leaveRequestRepository;
         }
 
         public async Task<LeaveBalanceResponse?> GetLeaveBalanceByIdAsync(Guid id)
@@ -61,21 +65,16 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<bool> CreateInitialBalancesForUserAsync(Guid userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
-            
+            var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
+
             var currentYear = DateTime.Now.Year;
             
-            // Create initial leave balances based on user's experience
             var leaveTypes = await _leaveTypeRepository.GetAllAsync();
             
             foreach (var leaveType in leaveTypes)
             {
-                int entitledDays = CalculateEntitledDays(leaveType, user);
-                
+                int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, currentYear);
+
                 var balance = new LeaveBalance
                 {
                     Id = Guid.NewGuid(),
@@ -86,7 +85,7 @@ namespace KmtBackend.BLL.Managers
                     UsedDays = 0,
                     CreatedAt = DateTime.UtcNow
                 };
-                
+
                 await _leaveBalanceRepository.CreateAsync(balance);
             }
             
@@ -95,7 +94,6 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<int> ResetAllUserBalancesAsync(int year)
         {
-            // Get all active users
             var users = await _userRepository.GetAllAsync();
             var activeUsers = users.Where(u => u.TerminationDate == null || u.TerminationDate > DateTime.UtcNow);
             
@@ -111,8 +109,8 @@ namespace KmtBackend.BLL.Managers
                     // Check if balance already exists
                     var existingBalance = await _leaveBalanceRepository.GetUserBalanceAsync(user.Id, leaveType.Id, year);
                     
-                    int entitledDays = CalculateEntitledDays(leaveType, user);
-                    
+                    int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, year);
+
                     if (existingBalance == null)
                     {
                         // Create new balance
@@ -160,48 +158,85 @@ namespace KmtBackend.BLL.Managers
             
             return count;
         }
-        
-        private int CalculateEntitledDays(LeaveType leaveType, User user)
+
+        private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
         {
-            if (!leaveType.IsSeniorityBased)
+            if (leaveType.IsGenderSpecific && leaveType.ApplicableGender.HasValue && user.Gender != leaveType.ApplicableGender.Value)
             {
-                // For non-seniority based leave types, return default entitlement
-                return GetDefaultEntitlement(leaveType.Name);
+                return 0; // Not eligible due to gender mismatch
             }
-            
-            // Calculate total work experience (including prior experience)
-            int totalYearsExperience = user.TotalWorkExperienceYears;
-            
-            // Determine entitlement based on seniority
-            if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
+
+            if (leaveType.MinServiceMonths.HasValue)
             {
-                return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-                    ? LeaveConstants.SeniorRegularLeaveDays
-                    : LeaveConstants.JuniorRegularLeaveDays;
+                int serviceYears = CalculateServiceMonths(user);
+
+                if (serviceYears < leaveType.MinServiceMonths.Value)
+                {
+                    return 0; // Not eligible due to insufficient service
+                }
             }
-            else if (leaveType.Name == LeaveConstants.CasualLeave)
+
+            if (leaveType.IsLimitedFrequency && leaveType.MaxUses.HasValue)
             {
-                return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-                    ? LeaveConstants.SeniorCasualLeaveDays
-                    : LeaveConstants.JuniorCasualLeaveDays;
+                // Count how many times this user has used this leave type
+                int usedCount = await CountLeaveUsageAsync(user.Id, leaveType.Id);
+
+                if (usedCount >= leaveType.MaxUses.Value)
+                {
+                    return 0; // Already used up the maximum allowed times
+                }
             }
-            
-            return GetDefaultEntitlement(leaveType.Name);
+
+            if (leaveType.IsSeniorityBased)
+            {
+                // Calculate total work experience (including prior experience)
+                int totalYearsExperience = user.TotalWorkExperienceYears;
+
+                // Determine entitlement based on seniority
+                if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
+                {
+                    return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
+                        ? LeaveConstants.SeniorRegularLeaveDays
+                        : LeaveConstants.JuniorRegularLeaveDays;
+                }
+                else if (leaveType.Name == LeaveConstants.CasualLeave)
+                {
+                    return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
+                        ? LeaveConstants.SeniorCasualLeaveDays
+                        : LeaveConstants.JuniorCasualLeaveDays;
+                }
+            }
+
+            var defaultEntitlements = LeaveConstants.GetDefaultEntitlementDays();
+            if (defaultEntitlements.TryGetValue(leaveType.Name, out int days))
+            {
+                return days;
+            }
+
+            return 0;
         }
-        
-        private int GetDefaultEntitlement(string leaveTypeName)
+
+        private async Task<int> CountLeaveUsageAsync(Guid userId, Guid leaveTypeId)
         {
-            return leaveTypeName switch
+            var approvedRequests = await _leaveRequestRepository.GetByUserIdAsync(userId);
+            return approvedRequests
+                .Count(r => r.LeaveTypeId == leaveTypeId && r.Status == LeaveRequestStatus.Approved);
+        }
+
+        private static int CalculateServiceMonths(User user)
+        {
+            var today = DateTime.UtcNow;
+
+            int monthsFromYears = (today.Year - user.HireDate.Year) * 12;
+
+            int monthsDifference = today.Month - user.HireDate.Month;
+
+            if (today.Day < user.HireDate.Day)
             {
-                LeaveConstants.RegularAnnualLeave => LeaveConstants.JuniorRegularLeaveDays,
-                LeaveConstants.CasualLeave => LeaveConstants.JuniorCasualLeaveDays,
-                LeaveConstants.SickLeave => LeaveConstants.SickLeaveDays,
-                LeaveConstants.MaternityLeave => LeaveConstants.MaternityLeaveDays,
-                LeaveConstants.MarriageLeave => LeaveConstants.MarriageLeaveDays,
-                LeaveConstants.BereavementLeave => LeaveConstants.BereavementLeaveDays,
-                LeaveConstants.PilgrimageLeave => LeaveConstants.PilgrimageLeaveDays,
-                _ => 0
-            };
+                monthsDifference--;
+            }
+
+            return monthsFromYears + monthsDifference;
         }
     }
 }
