@@ -45,5 +45,37 @@ namespace KmtBackend.DAL.Entities
         // Navigation property
         [ForeignKey("TitleId")]
         public Title? Title { get; set; }
+
+        [Required]
+        public DateTime HireDate { get; set; }
+
+        public DateTime? TerminationDate { get; set; }
+
+        // Navigation property for leave balances
+        public virtual ICollection<LeaveBalance> LeaveBalances { get; set; } = [];
+
+        // Navigation property for leave requests
+        public virtual ICollection<LeaveRequest> LeaveRequests { get; set; } = [];
+
+        /// <summary>
+        /// Prior work experience in months before joining this company
+        /// </summary>
+        [Required]
+        public int PriorWorkExperienceMonths { get; set; }
+
+        /// <summary>
+        /// Total work experience in months (calculated)
+        /// </summary>
+        [NotMapped]
+        public int TotalWorkExperienceMonths =>
+            PriorWorkExperienceMonths +
+            ((DateTime.UtcNow.Year - HireDate.Year) * 12) +
+            (DateTime.UtcNow.Month - HireDate.Month);
+
+        /// <summary>
+        /// Total work experience in years (calculated)
+        /// </summary>
+        [NotMapped]
+        public int TotalWorkExperienceYears => TotalWorkExperienceMonths / 12;
     }
 }

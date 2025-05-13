@@ -16,7 +16,9 @@ namespace KmtBackend.DAL.Context
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Permission> Permissions { get; set; } = null!;
         public DbSet<Title> Titles { get; set; } = null!;
-
+        public DbSet<LeaveType> LeaveTypes { get; set; } = null!;
+        public DbSet<LeaveBalance> LeaveBalances { get; set; } = null!;
+        public DbSet<LeaveRequest> LeaveRequests { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +49,30 @@ namespace KmtBackend.DAL.Context
                 .HasMany(d => d.Users)
                 .WithOne(u => u.Title)
                 .HasForeignKey(u => u.TitleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Leave types must have unique names
+            modelBuilder.Entity<LeaveType>()
+                .HasIndex(lt => lt.Name)
+                .IsUnique();
+
+            // User - LeaveBalance relationship
+            modelBuilder.Entity<LeaveBalance>()
+                .HasOne(lb => lb.User)
+                .WithMany(u => u.LeaveBalances)
+                .HasForeignKey(lb => lb.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: one balance per user, type and year
+            modelBuilder.Entity<LeaveBalance>()
+                .HasIndex(lb => new { lb.UserId, lb.LeaveTypeId, lb.Year })
+                .IsUnique();
+
+            // User - LeaveRequest relationship
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(lr => lr.User)
+                .WithMany(u => u.LeaveRequests)
+                .HasForeignKey(lr => lr.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Call base implementation

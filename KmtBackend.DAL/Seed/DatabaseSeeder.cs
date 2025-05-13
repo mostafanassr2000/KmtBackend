@@ -34,6 +34,8 @@ namespace KmtBackend.DAL.Seed
                 // Seed admin user last (depends on roles)
                 await SeedSuperAdminAsync(context, logger);
 
+                await SeedLeaveTypesAsync(context, logger);
+
                 logger.LogInformation("Database seeding completed successfully.");
             }
             catch (Exception ex)
@@ -210,6 +212,42 @@ namespace KmtBackend.DAL.Seed
 
             // Log success
             logger.LogInformation("Super admin user created successfully");
+        }
+
+        private static async Task SeedLeaveTypesAsync(KmtDbContext context, ILogger logger)
+        {
+            logger.LogInformation("Seeding leave types...");
+
+            if (!await context.LeaveTypes.AnyAsync())
+            {
+                logger.LogInformation("Creating leave types based on Egyptian labor law...");
+
+                var leaveTypeDefinitions = LeaveConstants.GetAllLeaveTypes();
+                var leaveTypes = new List<LeaveType>();
+
+                foreach (var leaveType in leaveTypeDefinitions)
+                {
+                    leaveTypes.Add(new LeaveType
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = leaveType.Key,
+                        NameAr = leaveType.Value.NameAr,
+                        Description = leaveType.Value.Description,
+                        DescriptionAr = leaveType.Value.DescriptionAr,
+                        IsSeniorityBased = leaveType.Value.IsSeniorityBased,
+                        AllowCarryOver = leaveType.Value.AllowCarryOver,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+
+                await context.LeaveTypes.AddRangeAsync(leaveTypes);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Leave types seeded successfully.");
+            }
+            else
+            {
+                logger.LogInformation("Leave types already exist in database.");
+            }
         }
     }
 }
