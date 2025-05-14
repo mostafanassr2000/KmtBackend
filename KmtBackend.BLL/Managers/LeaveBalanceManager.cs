@@ -4,6 +4,7 @@ using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories;
 using KmtBackend.DAL.Repositories.Interfaces;
 using KmtBackend.Models.DTOs.Leave;
+using KmtBackend.Models.Enums;
 using MapsterMapper;
 
 namespace KmtBackend.BLL.Managers

@@ -2,6 +2,7 @@ using KmtBackend.DAL.Context;
 using KmtBackend.DAL.Entities;
 using KmtBackend.DAL.Repositories.Interfaces;
 using KmtBackend.Models.DTOs.Common;
+using KmtBackend.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace KmtBackend.DAL.Repositories

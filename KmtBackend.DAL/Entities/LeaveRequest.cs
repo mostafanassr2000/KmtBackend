@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using KmtBackend.Models.Enums;
 
 namespace KmtBackend.DAL.Entities
 {
@@ -23,32 +24,28 @@ namespace KmtBackend.DAL.Entities
         [Required]
         public DateTime EndDate { get; set; }
 
-        // Total requested days
         [Required]
         public int Days { get; set; }
 
-        // Status: Pending, Approved, Rejected, Canceled
+        public bool IsHourlyLeave { get; set; }
+
+        public TimeSpan? StartTime { get; set; }
+
+        public TimeSpan? EndTime { get; set; }
+
+        public int? Month { get; set; }
+
         [Required]
         public LeaveRequestStatus Status { get; set; } = LeaveRequestStatus.Pending;
 
-        // Manager who processed the request
         public Guid? ProcessedById { get; set; }
 
         [ForeignKey(nameof(ProcessedById))]
         public User? ProcessedBy { get; set; }
 
-        // When the request was processed
         public DateTime? ProcessedDate { get; set; }
 
-        // Reason provided by manager for rejection (if applicable)
         [MaxLength(500)]
         public string? RejectionReason { get; set; }
-    }
-    public enum LeaveRequestStatus
-    {
-        Pending,
-        Approved,
-        Rejected,
-        Canceled
     }
 }

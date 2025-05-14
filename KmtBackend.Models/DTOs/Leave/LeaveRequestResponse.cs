@@ -17,5 +17,8 @@
         public DateTime? ProcessedDate { get; set; }
         public string? RejectionReason { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsHourlyLeave { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
     }
 }

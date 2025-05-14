@@ -14,11 +14,13 @@ namespace KmtBackend.DAL.Constants
 
         public const string MaternityLeave = "Maternity Leave";
 
-        public const string MarriageLeave = "Marriage Leave";
+        //public const string MarriageLeave = "Marriage Leave";
 
-        public const string BereavementLeave = "Bereavement Leave";
+        //public const string BereavementLeave = "Bereavement Leave";
 
         public const string PilgrimageLeave = "Pilgrimage Leave";
+
+        public const string TwoHourExcuse = "Two Hour Excuse";
 
         #endregion
 
@@ -44,6 +46,8 @@ namespace KmtBackend.DAL.Constants
         //public const int MarriageLeaveDays = 3;
 
         public const int PilgrimageLeaveDays = 30;
+
+        public const int TwoHourExcuseDaysPerMonth = 1;
 
         #endregion
 
@@ -110,6 +114,18 @@ namespace KmtBackend.DAL.Constants
                     true,               // IsLimitedFrequency
                     60,                  // MinServiceMonths (5 years minimum service)
                     1                   // MaxUses (only once per employer)
+                ),
+                [TwoHourExcuse] = (
+                    "إذن ساعتين",
+                    "Monthly two-hour excuse",
+                    "إذن الساعتين الشهري",
+                    false,  // IsSeniorityBased
+                    false,  // AllowCarryOver
+                    false,  // IsGenderSpecific
+                    null,   // ApplicableGender
+                    true,   // IsLimitedFrequency
+                    null,   // MinServiceMonths
+                    1       // MaxUses per month
                 )
             };
         }
@@ -124,7 +140,8 @@ namespace KmtBackend.DAL.Constants
                 [MaternityLeave] = MaternityLeaveDays,
                 //[MarriageLeave] = MarriageLeaveDays,
                 //[BereavementLeave] = BereavementLeaveDays,
-                [PilgrimageLeave] = PilgrimageLeaveDays
+                [PilgrimageLeave] = PilgrimageLeaveDays,
+                [TwoHourExcuse] = TwoHourExcuseDaysPerMonth
             };
         }
     }

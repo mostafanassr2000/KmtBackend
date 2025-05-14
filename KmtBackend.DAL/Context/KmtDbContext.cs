@@ -68,6 +68,10 @@ namespace KmtBackend.DAL.Context
                 .HasIndex(lb => new { lb.UserId, lb.LeaveTypeId, lb.Year })
                 .IsUnique();
 
+            modelBuilder.Entity<LeaveBalance>()
+                .Property(lb => lb.UsedDays)
+                .HasColumnType("decimal(5,2)");
+
             // User - LeaveRequest relationship
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(lr => lr.User)
