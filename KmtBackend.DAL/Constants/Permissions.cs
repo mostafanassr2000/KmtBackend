@@ -1,204 +1,133 @@
-﻿using System.Collections.Generic;
-
-namespace KmtBackend.DAL.Constants
+﻿namespace KmtBackend.DAL.Constants
 {
-    /// <summary>
-    /// Static class that defines all application permissions
-    /// </summary>
     public static class Permissions
     {
         #region User Permissions
-        
-        /// <summary>
-        /// Permission to view all users
-        /// </summary>
+
         public const string ViewUsers = "users.view";
-        
-        /// <summary>
-        /// Permission to create new users
-        /// </summary>
         public const string CreateUsers = "users.create";
-        
-        /// <summary>
-        /// Permission to update existing users
-        /// </summary>
         public const string UpdateUsers = "users.update";
-        
-        /// <summary>
-        /// Permission to delete users
-        /// </summary>
         public const string DeleteUsers = "users.delete";
-        
+
         #endregion
-        
+
         #region Department Permissions
-        
-        /// <summary>
-        /// Permission to view all departments
-        /// </summary>
+
         public const string ViewDepartments = "departments.view";
-        
-        /// <summary>
-        /// Permission to create new departments
-        /// </summary>
         public const string CreateDepartments = "departments.create";
-        
-        /// <summary>
-        /// Permission to update existing departments
-        /// </summary>
         public const string UpdateDepartments = "departments.update";
-        
-        /// <summary>
-        /// Permission to delete departments
-        /// </summary>
         public const string DeleteDepartments = "departments.delete";
 
         #endregion
 
         #region Title Permissions
 
-        /// <summary>
-        /// Permission to view all titles
-        /// </summary>
         public const string ViewTitles = "titles.view";
-
-        /// <summary>
-        /// Permission to create new titles
-        /// </summary>
         public const string CreateTitles = "titles.create";
-
-        /// <summary>
-        /// Permission to update existing titles
-        /// </summary>
         public const string UpdateTitles = "titles.update";
-
-        /// <summary>
-        /// Permission to delete titles
-        /// </summary>
         public const string DeleteTitles = "titles.delete";
 
         #endregion
 
         #region Role Permissions
 
-        /// <summary>
-        /// Permission to view all roles
-        /// </summary>
         public const string ViewRoles = "roles.view";
-        
-        /// <summary>
-        /// Permission to create new roles
-        /// </summary>
         public const string CreateRoles = "roles.create";
-        
-        /// <summary>
-        /// Permission to update existing roles
-        /// </summary>
         public const string UpdateRoles = "roles.update";
-        
-        /// <summary>
-        /// Permission to delete roles
-        /// </summary>
         public const string DeleteRoles = "roles.delete";
-        
-        /// <summary>
-        /// Permission to assign roles to users
-        /// </summary>
         public const string AssignRoles = "roles.assign";
-        
-        #endregion
-        
-        #region Permission Management
-        
-        /// <summary>
-        /// Permission to view all available permissions
-        /// </summary>
-        public const string ViewPermissions = "permissions.view";
-        
-        /// <summary>
-        /// Permission to assign permissions to roles
-        /// </summary>
-        public const string AssignPermissions = "permissions.assign";
-        
+
         #endregion
 
-        /// <summary>
-        /// Gets all defined permissions as a list of strings
-        /// </summary>
-        /// <returns>List of all permission codes</returns>
+        #region Permission Management
+
+        public const string ViewPermissions = "permissions.view";
+        public const string AssignPermissions = "permissions.assign";
+
+        #endregion
+
+        #region Mission Management Permissions
+
+        public const string ViewMissions = "missions.view";
+        public const string CreateMissions = "missions.create";
+        public const string UpdateMissions = "missions.update";
+        public const string DeleteMissions = "missions.delete";
+        public const string AssignToMissions = "missions.assign";
+        public const string UpdateMissionTransportation = "missions.transportation.update";
+
+        #endregion
+
         public static IEnumerable<string> GetAllPermissions()
         {
-            // Return all permission constants
-            return new List<string>
-            {
-                // User permissions
+            return
+            [
                 ViewUsers,
                 CreateUsers,
                 UpdateUsers,
                 DeleteUsers,
-                
-                // Department permissions
+
                 ViewDepartments,
                 CreateDepartments,
                 UpdateDepartments,
                 DeleteDepartments,
 
-                // Title permissions
                 ViewTitles,
                 CreateTitles,
                 UpdateTitles,
                 DeleteTitles,
-                
-                // Role permissions
+
                 ViewRoles,
                 CreateRoles,
                 UpdateRoles,
                 DeleteRoles,
                 AssignRoles,
-                
-                // Permission management
+
                 ViewPermissions,
-                AssignPermissions
-            };
+                AssignPermissions,
+
+                ViewMissions,
+                CreateMissions,
+                UpdateMissions,
+                DeleteMissions,
+                AssignToMissions,
+                UpdateMissionTransportation
+            ];
         }
-        
-        /// <summary>
-        /// Gets all permissions with their descriptions
-        /// </summary>
-        /// <returns>Dictionary of permission codes and descriptions</returns>
+
         public static Dictionary<string, (string Description, string DescriptionAr)> GetAllPermissionsWithDescriptions()
         {
-            // Create dictionary with code as key and description tuple as value
             return new Dictionary<string, (string, string)>
             {
-                // User permissions
                 [ViewUsers] = ("View all users", "عرض جميع المستخدمين"),
                 [CreateUsers] = ("Create new users", "إنشاء مستخدمين جدد"),
                 [UpdateUsers] = ("Update existing users", "تحديث المستخدمين الحاليين"),
                 [DeleteUsers] = ("Delete users", "حذف المستخدمين"),
-                
-                // Department permissions
+
                 [ViewDepartments] = ("View all departments", "عرض جميع الأقسام"),
                 [CreateDepartments] = ("Create new departments", "إنشاء أقسام جديدة"),
                 [UpdateDepartments] = ("Update existing departments", "تحديث الأقسام الحالية"),
                 [DeleteDepartments] = ("Delete departments", "حذف الأقسام"),
 
-                // Title permissions
                 [ViewTitles] = ("View all titles", "عرض جميع الوظائف"),
                 [CreateTitles] = ("Create new titles", "إنشاء وظائف جديدة"),
                 [UpdateTitles] = ("Update existing titles", "تحديث الوظائف الحالية"),
                 [DeleteTitles] = ("Delete titles", "حذف الوظائف"),
 
-                // Role permissions
                 [ViewRoles] = ("View all roles", "عرض جميع الأدوار"),
                 [CreateRoles] = ("Create new roles", "إنشاء أدوار جديدة"),
                 [UpdateRoles] = ("Update existing roles", "تحديث الأدوار الحالية"),
                 [DeleteRoles] = ("Delete roles", "حذف الأدوار"),
                 [AssignRoles] = ("Assign roles to users", "تعيين الأدوار للمستخدمين"),
-                
-                // Permission management
+
                 [ViewPermissions] = ("View all permissions", "عرض جميع الصلاحيات"),
-                [AssignPermissions] = ("Assign permissions to roles", "تعيين الصلاحيات للأدوار")
+                [AssignPermissions] = ("Assign permissions to roles", "تعيين الصلاحيات للأدوار"),
+
+                [ViewMissions] = ("View all missions", "عرض جميع المهام"),
+                [CreateMissions] = ("Create new missions", "إنشاء مهام جديدة"),
+                [UpdateMissions] = ("Update existing missions", "تحديث المهام الحالية"),
+                [DeleteMissions] = ("Delete missions", "حذف المهام"),
+                [AssignToMissions] = ("Assign users to missions", "تعيين المستخدمين إلى المهام"),
+                [UpdateMissionTransportation] = ("Update mission transportation", "تحديث وسيلة التنقل للمهام")
             };
         }
     }

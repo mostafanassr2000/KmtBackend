@@ -59,5 +59,11 @@ namespace KmtBackend.DAL.Entities
 
         [Required]
         public Gender Gender { get; set; }
+
+        public virtual ICollection<Mission> Missions { get; set; } = [];
+
+        public virtual ICollection<MissionAssignment> MissionAssignments { get; set; } = [];
+
+        public virtual ICollection<Mission> CreatedMissions { get; set; } = [];
     }
 }

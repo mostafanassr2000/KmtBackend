@@ -23,6 +23,16 @@ namespace KmtBackend.DAL.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<Guid> ids)
+        {
+            var idsList = ids.ToList();
+
+            return await _context.Users
+                .Where(u => idsList.Contains(u.Id))
+                .Include(u => u.Missions)
+                .ToListAsync();
+        }
+
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users

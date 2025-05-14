@@ -19,6 +19,8 @@ namespace KmtBackend.DAL.Context
         public DbSet<LeaveType> LeaveTypes { get; set; } = null!;
         public DbSet<LeaveBalance> LeaveBalances { get; set; } = null!;
         public DbSet<LeaveRequest> LeaveRequests { get; set; } = null!;
+        public DbSet<Mission> Missions { get; set; } = null!;
+        public DbSet<MissionAssignment> MissionAssignments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,6 +79,23 @@ namespace KmtBackend.DAL.Context
                 .HasOne(lr => lr.User)
                 .WithMany(u => u.LeaveRequests)
                 .HasForeignKey(lr => lr.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Mission>()
+                .HasOne(m => m.CreatedBy)
+                .WithMany(u => u.CreatedMissions)
+                .HasForeignKey(m => m.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Missions)
+                .WithMany(m => m.Users)
+                .UsingEntity<MissionAssignment>();
+
+            modelBuilder.Entity<MissionAssignment>()
+                .HasOne(ma => ma.AssignedBy)
+                .WithMany()
+                .HasForeignKey(ma => ma.AssignedById)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Call base implementation

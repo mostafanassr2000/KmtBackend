@@ -6,7 +6,9 @@ namespace KmtBackend.DAL.Repositories.Interfaces
     public interface IUserRepository
     {
         Task<User?> GetByIdAsync(Guid id);
-        
+
+        Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<Guid> ids);
+
         Task<User?> GetByEmailAsync(string email);
 
         Task<User?> GetByPhoneNumberAsync(string phoneNumber);

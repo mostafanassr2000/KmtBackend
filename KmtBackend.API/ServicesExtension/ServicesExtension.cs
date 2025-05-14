@@ -21,6 +21,7 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<ILeaveTypeManager, LeaveTypeManager>();
             services.AddScoped<ILeaveBalanceManager, LeaveBalanceManager>();
             services.AddScoped<ILeaveRequestManager, LeaveRequestManager>();
+            services.AddScoped<IMissionManager, MissionManager>();
         }
 
         public static void RegisterRepositories(this IServiceCollection services)
@@ -33,6 +34,8 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
             services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+            services.AddScoped<IMissionRepository, MissionRepository>();
+            services.AddScoped<IMissionAssignmentRepository, MissionAssignmentRepository>();
         }
 
         public static void RegisterServices(this IServiceCollection services)
