@@ -36,6 +36,109 @@ namespace KmtBackend.BLL.Managers
             _leaveTypeRepository = leaveTypeRepository;
         }
 
+        //public async Task<LeaveRequestResponse> CreateLeaveRequestAsync(Guid userId, CreateLeaveRequestRequest request)
+        //{
+        //    // Validate user exists
+        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
+
+        //    // Get leave type
+        //    var leaveType = await _leaveTypeRepository.GetByIdAsync(request.LeaveTypeId) ??
+        //        throw new KeyNotFoundException("Leave type not found");
+
+        //    int days;
+        //    TimeSpan? startTime = null;
+        //    TimeSpan? endTime = null;
+        //    int? month = null;
+        //    bool isHourlyLeave = false;
+
+        //    // Two-Hour Excuse handling
+        //    if (leaveType.Name == LeaveConstants.TwoHourExcuse)
+        //    {
+        //        if (!request.IsHourlyLeave || !request.StartTime.HasValue)
+        //        {
+        //            throw new InvalidOperationException("Start time must be provided for two-hour excuses");
+        //        }
+
+        //        isHourlyLeave = true;
+        //        startTime = request.StartTime;
+        //        endTime = startTime.Value.Add(TimeSpan.FromHours(2)); // Automatically calculate end time
+
+        //        // Set current month for monthly tracking
+        //        month = DateTime.Now.Month;
+
+        //        // Check if user already used their excuse this month
+        //        var existingExcuses = await _leaveRequestRepository.GetByUserIdAsync(userId);
+        //        bool alreadyUsedThisMonth = existingExcuses.Any(r =>
+        //            r.LeaveTypeId == request.LeaveTypeId &&
+        //            r.Month == month &&
+        //            r.StartDate.Year == DateTime.Now.Year &&
+        //            (r.Status == LeaveRequestStatus.Approved || r.Status == LeaveRequestStatus.Pending));
+
+        //        if (alreadyUsedThisMonth)
+        //        {
+        //            throw new InvalidOperationException($"You have already used or requested your two-hour excuse for this month");
+        //        }
+
+        //        // For two-hour excuses, we convert to days (0.25 days = 2 hours in an 8-hour workday)
+        //        days = 1; // We'll keep days = 1 in DB but deduct 0.25 from regular leave balance when approved
+        //    }
+        //    else
+        //    {
+        //        // Regular leave handling
+        //        days = (int)(request.EndDate.Date - request.StartDate.Date).TotalDays + 1;
+
+        //        if (days <= 0)
+        //        {
+        //            throw new ArgumentException("End date must be after start date");
+        //        }
+        //    }
+
+        //    // Get the user's leave balance for regular leaves
+        //    var currentYear = DateTime.Now.Year;
+
+        //    // For two-hour excuses, check regular leave balance instead of excuse balance
+        //    Guid balanceLeaveTypeId = leaveType.Name == LeaveConstants.TwoHourExcuse ?
+        //        (await _leaveTypeRepository.GetByNameAsync(LeaveConstants.RegularAnnualLeave))!.Id :
+        //        request.LeaveTypeId;
+
+        //    var leaveBalance = await _leaveBalanceRepository.GetUserBalanceAsync(userId, balanceLeaveTypeId, currentYear) ??
+        //        throw new InvalidOperationException("No leave balance found for this leave type");
+
+        //    // For two-hour excuses, check if user has at least 0.25 days of regular leave
+        //    decimal requiredDays = leaveType.Name == LeaveConstants.TwoHourExcuse ? 0.25m : days;
+
+        //    if (leaveBalance.RemainingDays < requiredDays && leaveType.Name == LeaveConstants.TwoHourExcuse)
+        //    {
+        //        throw new InvalidOperationException($"Insufficient regular leave balance for two-hour excuse");
+        //    }
+        //    else if (leaveBalance.RemainingDays < days)
+        //    {
+        //        throw new InvalidOperationException($"Insufficient leave balance. Available: {leaveBalance.RemainingDays}, Requested: {days}");
+        //    }
+
+        //    // Create the leave request
+        //    var leaveRequest = new LeaveRequest
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        UserId = userId,
+        //        LeaveTypeId = request.LeaveTypeId,
+        //        StartDate = request.StartDate,
+        //        EndDate = request.EndDate,
+        //        Days = days,
+        //        Status = LeaveRequestStatus.Pending,
+        //        IsHourlyLeave = isHourlyLeave,
+        //        StartTime = startTime,
+        //        EndTime = endTime,
+        //        Month = month,
+        //        CreatedAt = DateTime.UtcNow
+        //    };
+
+        //    var createdRequest = await _leaveRequestRepository.CreateAsync(leaveRequest);
+
+        //    return _mapper.Map<LeaveRequestResponse>(createdRequest);
+        //}
+
+
         public async Task<LeaveRequestResponse> CreateLeaveRequestAsync(Guid userId, CreateLeaveRequestRequest request)
         {
             // Validate user exists
@@ -79,8 +182,7 @@ namespace KmtBackend.BLL.Managers
                     throw new InvalidOperationException($"You have already used or requested your two-hour excuse for this month");
                 }
 
-                // For two-hour excuses, we convert to days (0.25 days = 2 hours in an 8-hour workday)
-                days = 1; // We'll keep days = 1 in DB but deduct 0.25 from regular leave balance when approved
+                days = 1; // We'll deduct 0.25 when approved
             }
             else
             {
@@ -93,7 +195,7 @@ namespace KmtBackend.BLL.Managers
                 }
             }
 
-            // Get the user's leave balance for regular leaves
+            // Get the user's leave balance
             var currentYear = DateTime.Now.Year;
 
             // For two-hour excuses, check regular leave balance instead of excuse balance
@@ -104,16 +206,20 @@ namespace KmtBackend.BLL.Managers
             var leaveBalance = await _leaveBalanceRepository.GetUserBalanceAsync(userId, balanceLeaveTypeId, currentYear) ??
                 throw new InvalidOperationException("No leave balance found for this leave type");
 
-            // For two-hour excuses, check if user has at least 0.25 days of regular leave
-            int requiredDays = leaveType.Name == LeaveConstants.TwoHourExcuse ? 1 : days;
-
-            if (leaveBalance.RemainingDays < requiredDays && leaveType.Name == LeaveConstants.TwoHourExcuse)
+            // Check if the leave is available yet based on NotUsedBefore date
+            if (request.StartDate < leaveBalance.NotUsedBefore)
             {
-                throw new InvalidOperationException($"Insufficient regular leave balance for two-hour excuse");
+                throw new InvalidOperationException(
+                    $"This leave balance is not available until {leaveBalance.NotUsedBefore.ToShortDateString()}");
             }
-            else if (leaveBalance.RemainingDays < days)
+
+            // For two-hour excuses, check if user has at least 0.25 days of regular leave
+            decimal requiredDays = leaveType.Name == LeaveConstants.TwoHourExcuse ? 0.25m : days;
+
+            if (leaveBalance.RemainingDays < requiredDays)
             {
-                throw new InvalidOperationException($"Insufficient leave balance. Available: {leaveBalance.RemainingDays}, Requested: {days}");
+                throw new InvalidOperationException(
+                    $"Insufficient leave balance. Available: {leaveBalance.RemainingDays}, Requested: {requiredDays}");
             }
 
             // Create the leave request

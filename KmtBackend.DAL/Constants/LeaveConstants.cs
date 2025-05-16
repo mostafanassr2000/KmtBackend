@@ -10,15 +10,15 @@ namespace KmtBackend.DAL.Constants
 
         public const string CasualLeave = "Casual Leave";
 
-        public const string SickLeave = "Sick Leave";
+        //public const string SickLeave = "Sick Leave";
 
-        public const string MaternityLeave = "Maternity Leave";
+        //public const string MaternityLeave = "Maternity Leave";
 
         //public const string MarriageLeave = "Marriage Leave";
 
         //public const string BereavementLeave = "Bereavement Leave";
 
-        public const string PilgrimageLeave = "Pilgrimage Leave";
+        //public const string PilgrimageLeave = "Pilgrimage Leave";
 
         public const string TwoHourExcuse = "Two Hour Excuse";
 
@@ -27,33 +27,35 @@ namespace KmtBackend.DAL.Constants
 
         #region Egyptian Labor Law Entitlement Rules
 
-        public const int SeniorityYearsThreshold = 10;
+        //public const int SeniorityYearsThreshold = 10;
 
         public const int JuniorRegularLeaveDays = 15;
 
-        public const int SeniorRegularLeaveDays = 24;
+        //public const int SeniorRegularLeaveDays = 24;
 
         public const int JuniorCasualLeaveDays = 6;
 
-        public const int SeniorCasualLeaveDays = 6;
+        //public const int SeniorCasualLeaveDays = 6;
 
-        public const int SickLeaveDays = 180;
+        //public const int SickLeaveDays = 180;
 
-        public const int MaternityLeaveDays = 90;
+        //public const int MaternityLeaveDays = 90;
 
         //public const int BereavementLeaveDays = 3;
 
         //public const int MarriageLeaveDays = 3;
 
-        public const int PilgrimageLeaveDays = 30;
+        //public const int PilgrimageLeaveDays = 30;
 
         public const int TwoHourExcuseDaysPerMonth = 1;
 
+        public const int MonthsBeforeLeavesAreAvilable = 12;
+
         #endregion
 
-        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver, bool IsGenderSpecific, Gender? ApplicableGender, bool IsLimitedFrequency, int? MinServiceMonths, int? MaxUses)> GetAllLeaveTypes()
+        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver, bool IsGenderSpecific, Gender? ApplicableGender, bool IsLimitedFrequency, /*int? MinServiceMonths,*/ int? MaxUses)> GetAllLeaveTypes()
         {
-            return new Dictionary<string, (string, string, string, bool, bool, bool, Gender?, bool, int?, int?)>
+            return new Dictionary<string, (string, string, string, bool, bool, bool, Gender?, bool, /*int?,*/ int?)>
             {
                 [RegularAnnualLeave] = (
                     "إجازة اعتيادية",
@@ -64,33 +66,33 @@ namespace KmtBackend.DAL.Constants
                     false,  // IsGenderSpecific
                     null,   // ApplicableGender
                     false,  // IsLimitedFrequency
-                    null,   // MinServiceYears
+                    //12,   // MinServiceMonths
                     null    // MaxUses
                 ),
                 [CasualLeave] = (
                     "إجازة عارضة",
                     "Emergency leave for unexpected circumstances",
                     "إجازة طارئة للظروف غير المتوقعة",
-                    false, false, false, null, false, null, null
+                    false, false, false, null, false, /*12,*/ null
                 ),
-                [SickLeave] = (
-                    "إجازة مرضية",
-                    "Leave for illness and medical reasons",
-                    "إجازة للمرض والأسباب الطبية",
-                    false, false, false, null, false, null, null
-                ),
-                [MaternityLeave] = (
-                    "إجازة أمومة",
-                    "Leave for childbirth and recovery",
-                    "إجازة للولادة والتعافي",
-                    false,              // IsSeniorityBased
-                    false,              // AllowCarryOver
-                    true,               // IsGenderSpecific
-                    Gender.Female,      // ApplicableGender
-                    true,               // IsLimitedFrequency
-                    10,                  // MinServiceMonths (10 months)
-                    2                   // MaxUses (max 2 maternity leaves)
-                ),
+                //[SickLeave] = (
+                //    "إجازة مرضية",
+                //    "Leave for illness and medical reasons",
+                //    "إجازة للمرض والأسباب الطبية",
+                //    false, false, false, null, false, null, null
+                //),
+                //[MaternityLeave] = (
+                //    "إجازة أمومة",
+                //    "Leave for childbirth and recovery",
+                //    "إجازة للولادة والتعافي",
+                //    false,              // IsSeniorityBased
+                //    false,              // AllowCarryOver
+                //    true,               // IsGenderSpecific
+                //    Gender.Female,      // ApplicableGender
+                //    true,               // IsLimitedFrequency
+                //    10,                  // MinServiceMonths (10 months)
+                //    2                   // MaxUses (max 2 maternity leaves)
+                //),
                 //[MarriageLeave] = (
                 //    "إجازة زواج",
                 //    "Leave for employee's marriage",
@@ -103,18 +105,18 @@ namespace KmtBackend.DAL.Constants
                 //    "إجازة لوفاة أحد أفراد العائلة المباشرة",
                 //    false, false, false, null, false, null, null
                 //),
-                [PilgrimageLeave] = (
-                    "إجازة حج",
-                    "Leave for religious pilgrimage",
-                    "إجازة لأداء فريضة الحج",
-                    false,              // IsSeniorityBased
-                    false,              // AllowCarryOver
-                    false,              // IsGenderSpecific
-                    null,               // ApplicableGender
-                    true,               // IsLimitedFrequency
-                    60,                  // MinServiceMonths (5 years minimum service)
-                    1                   // MaxUses (only once per employer)
-                ),
+                //[PilgrimageLeave] = (
+                //    "إجازة حج",
+                //    "Leave for religious pilgrimage",
+                //    "إجازة لأداء فريضة الحج",
+                //    false,              // IsSeniorityBased
+                //    false,              // AllowCarryOver
+                //    false,              // IsGenderSpecific
+                //    null,               // ApplicableGender
+                //    true,               // IsLimitedFrequency
+                //    60,                  // MinServiceMonths (5 years minimum service)
+                //    1                   // MaxUses (only once per employer)
+                //),
                 [TwoHourExcuse] = (
                     "إذن ساعتين",
                     "Monthly two-hour excuse",
@@ -124,7 +126,7 @@ namespace KmtBackend.DAL.Constants
                     false,  // IsGenderSpecific
                     null,   // ApplicableGender
                     true,   // IsLimitedFrequency
-                    null,   // MinServiceMonths
+                    //null,   // MinServiceMonths
                     1       // MaxUses per month
                 )
             };
@@ -136,11 +138,11 @@ namespace KmtBackend.DAL.Constants
             {
                 [RegularAnnualLeave] = JuniorRegularLeaveDays,
                 [CasualLeave] = JuniorCasualLeaveDays,
-                [SickLeave] = SickLeaveDays,
-                [MaternityLeave] = MaternityLeaveDays,
+                //[SickLeave] = SickLeaveDays,
+                //[MaternityLeave] = MaternityLeaveDays,
                 //[MarriageLeave] = MarriageLeaveDays,
                 //[BereavementLeave] = BereavementLeaveDays,
-                [PilgrimageLeave] = PilgrimageLeaveDays,
+                //[PilgrimageLeave] = PilgrimageLeaveDays,
                 [TwoHourExcuse] = TwoHourExcuseDaysPerMonth
             };
         }

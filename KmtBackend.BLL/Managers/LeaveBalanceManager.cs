@@ -64,17 +64,56 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<LeaveBalanceResponse>(updatedBalance);
         }
 
+        //public async Task<bool> CreateInitialBalancesForUserAsync(Guid userId)
+        //{
+        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
+
+        //    var currentYear = DateTime.Now.Year;
+
+        //    var leaveTypes = await _leaveTypeRepository.GetAllAsync();
+
+        //    foreach (var leaveType in leaveTypes)
+        //    {
+        //        int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, currentYear);
+
+        //        var balance = new LeaveBalance
+        //        {
+        //            Id = Guid.NewGuid(),
+        //            UserId = user.Id,
+        //            LeaveTypeId = leaveType.Id,
+        //            Year = currentYear,
+        //            TotalDays = entitledDays,
+        //            UsedDays = 0,
+        //            CreatedAt = DateTime.UtcNow
+        //        };
+
+        //        await _leaveBalanceRepository.CreateAsync(balance);
+        //    }
+
+        //    return true;
+        //}
+
         public async Task<bool> CreateInitialBalancesForUserAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
-
             var currentYear = DateTime.Now.Year;
-            
             var leaveTypes = await _leaveTypeRepository.GetAllAsync();
-            
+
             foreach (var leaveType in leaveTypes)
             {
                 int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, currentYear);
+
+                DateTime notUsedBefore;
+
+                if (leaveType.Name == LeaveConstants.TwoHourExcuse)
+                {
+                    // Two Hour Excuse is available immediately
+                    notUsedBefore = user.HireDate;
+                }
+                else
+                {
+                    notUsedBefore = user.HireDate.AddMonths(LeaveConstants.MonthsBeforeLeavesAreAvilable);
+                }
 
                 var balance = new LeaveBalance
                 {
@@ -84,37 +123,113 @@ namespace KmtBackend.BLL.Managers
                     Year = currentYear,
                     TotalDays = entitledDays,
                     UsedDays = 0,
+                    NotUsedBefore = notUsedBefore,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _leaveBalanceRepository.CreateAsync(balance);
             }
-            
+
             return true;
         }
+
+        //public async Task<int> ResetAllUserBalancesAsync(int year)
+        //{
+        //    var users = await _userRepository.GetAllAsync();
+        //    var activeUsers = users.Where(u => u.TerminationDate == null || u.TerminationDate > DateTime.UtcNow);
+
+        //    int count = 0;
+
+        //    foreach (var user in activeUsers)
+        //    {
+        //        // Get leave types
+        //        var leaveTypes = await _leaveTypeRepository.GetAllAsync();
+
+        //        foreach (var leaveType in leaveTypes)
+        //        {
+        //            // Check if balance already exists
+        //            var existingBalance = await _leaveBalanceRepository.GetUserBalanceAsync(user.Id, leaveType.Id, year);
+
+        //            int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, year);
+
+        //            if (existingBalance == null)
+        //            {
+        //                // Create new balance
+        //                var balance = new LeaveBalance
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    UserId = user.Id,
+        //                    LeaveTypeId = leaveType.Id,
+        //                    Year = year,
+        //                    TotalDays = entitledDays,
+        //                    UsedDays = 0,
+        //                    CreatedAt = DateTime.UtcNow
+        //                };
+
+        //                await _leaveBalanceRepository.CreateAsync(balance);
+        //            }
+        //            else
+        //            {
+        //                // Handle carry-over if applicable
+        //                int carryOverDays = 0;
+
+        //                //if (leaveType.AllowCarryOver && year > DateTime.Now.Year - 1)
+        //                //{
+        //                //    // Check previous year balance
+        //                //    var previousYearBalance = await _leaveBalanceRepository.GetUserBalanceAsync(
+        //                //        user.Id, leaveType.Id, year - 1);
+
+        //                //    if (previousYearBalance != null && previousYearBalance.RemainingDays > 0)
+        //                //    {
+        //                //        carryOverDays = Math.Min(previousYearBalance.RemainingDays, 10); // Max 10 days carried over
+        //                //    }
+        //                //}
+
+        //                // Update existing balance
+        //                existingBalance.TotalDays = entitledDays + carryOverDays;
+        //                existingBalance.UsedDays = 0;
+        //                existingBalance.UpdatedAt = DateTime.UtcNow;
+
+        //                await _leaveBalanceRepository.UpdateAsync(existingBalance);
+        //            }
+
+        //            count++;
+        //        }
+        //    }
+
+        //    return count;
+        //}
 
         public async Task<int> ResetAllUserBalancesAsync(int year)
         {
             var users = await _userRepository.GetAllAsync();
             var activeUsers = users.Where(u => u.TerminationDate == null || u.TerminationDate > DateTime.UtcNow);
-            
+
             int count = 0;
-            
+
             foreach (var user in activeUsers)
             {
-                // Get leave types
                 var leaveTypes = await _leaveTypeRepository.GetAllAsync();
-                
+
                 foreach (var leaveType in leaveTypes)
                 {
-                    // Check if balance already exists
                     var existingBalance = await _leaveBalanceRepository.GetUserBalanceAsync(user.Id, leaveType.Id, year);
-                    
                     int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, year);
 
                     if (existingBalance == null)
                     {
-                        // Create new balance
+                        DateTime notUsedBefore;
+
+                        if (leaveType.Name == LeaveConstants.TwoHourExcuse)
+                        {
+                            // Two Hour Excuse is available immediately
+                            notUsedBefore = user.HireDate;
+                        }
+                        else
+                        {
+                            notUsedBefore = user.HireDate.AddMonths(LeaveConstants.MonthsBeforeLeavesAreAvilable);
+                        }
+
                         var balance = new LeaveBalance
                         {
                             Id = Guid.NewGuid(),
@@ -123,60 +238,32 @@ namespace KmtBackend.BLL.Managers
                             Year = year,
                             TotalDays = entitledDays,
                             UsedDays = 0,
+                            NotUsedBefore = notUsedBefore,
                             CreatedAt = DateTime.UtcNow
                         };
-                        
+
                         await _leaveBalanceRepository.CreateAsync(balance);
                     }
                     else
                     {
-                        // Handle carry-over if applicable
-                        int carryOverDays = 0;
-                        
-                        //if (leaveType.AllowCarryOver && year > DateTime.Now.Year - 1)
-                        //{
-                        //    // Check previous year balance
-                        //    var previousYearBalance = await _leaveBalanceRepository.GetUserBalanceAsync(
-                        //        user.Id, leaveType.Id, year - 1);
-                                
-                        //    if (previousYearBalance != null && previousYearBalance.RemainingDays > 0)
-                        //    {
-                        //        carryOverDays = Math.Min(previousYearBalance.RemainingDays, 10); // Max 10 days carried over
-                        //    }
-                        //}
-                        
-                        // Update existing balance
-                        existingBalance.TotalDays = entitledDays + carryOverDays;
+                        existingBalance.TotalDays = entitledDays;
                         existingBalance.UsedDays = 0;
                         existingBalance.UpdatedAt = DateTime.UtcNow;
-                        
+
                         await _leaveBalanceRepository.UpdateAsync(existingBalance);
                     }
-                    
+
                     count++;
                 }
             }
-            
+
             return count;
         }
 
+
         private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
         {
-            if (leaveType.IsGenderSpecific && leaveType.ApplicableGender.HasValue && user.Gender != leaveType.ApplicableGender.Value)
-            {
-                return 0; // Not eligible due to gender mismatch
-            }
-
-            if (leaveType.MinServiceMonths.HasValue)
-            {
-                int serviceYears = CalculateServiceMonths(user);
-
-                if (serviceYears < leaveType.MinServiceMonths.Value)
-                {
-                    return 0; // Not eligible due to insufficient service
-                }
-            }
-
+            // For limited frequency leaves (like Two Hour Excuse)
             if (leaveType.IsLimitedFrequency && leaveType.MaxUses.HasValue)
             {
                 // Count how many times this user has used this leave type
@@ -188,26 +275,7 @@ namespace KmtBackend.BLL.Managers
                 }
             }
 
-            if (leaveType.IsSeniorityBased)
-            {
-                // Calculate total work experience (including prior experience)
-                int totalYearsExperience = user.TotalWorkExperienceYears;
-
-                // Determine entitlement based on seniority
-                if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
-                {
-                    return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-                        ? LeaveConstants.SeniorRegularLeaveDays
-                        : LeaveConstants.JuniorRegularLeaveDays;
-                }
-                else if (leaveType.Name == LeaveConstants.CasualLeave)
-                {
-                    return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-                        ? LeaveConstants.SeniorCasualLeaveDays
-                        : LeaveConstants.JuniorCasualLeaveDays;
-                }
-            }
-
+            // Get default entitlement days directly from constants
             var defaultEntitlements = LeaveConstants.GetDefaultEntitlementDays();
             if (defaultEntitlements.TryGetValue(leaveType.Name, out int days))
             {
@@ -216,6 +284,63 @@ namespace KmtBackend.BLL.Managers
 
             return 0;
         }
+
+        //private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
+        //{
+        //    //if (leaveType.IsGenderSpecific && leaveType.ApplicableGender.HasValue && user.Gender != leaveType.ApplicableGender.Value)
+        //    //{
+        //    //    return 0; // Not eligible due to gender mismatch
+        //    //}
+
+        //    if (leaveType.MinServiceMonths.HasValue)
+        //    {
+        //        int serviceYears = CalculateServiceMonths(user);
+
+        //        if (serviceYears < leaveType.MinServiceMonths.Value)
+        //        {
+        //            return 0; // Not eligible due to insufficient service
+        //        }
+        //    }
+
+        //    if (leaveType.IsLimitedFrequency && leaveType.MaxUses.HasValue)
+        //    {
+        //        // Count how many times this user has used this leave type
+        //        int usedCount = await CountLeaveUsageAsync(user.Id, leaveType.Id);
+
+        //        if (usedCount >= leaveType.MaxUses.Value)
+        //        {
+        //            return 0; // Already used up the maximum allowed times
+        //        }
+        //    }
+
+        //    //if (leaveType.IsSeniorityBased)
+        //    //{
+        //    //    // Calculate total work experience (including prior experience)
+        //    //    int totalYearsExperience = user.TotalWorkExperienceYears;
+
+        //    //    // Determine entitlement based on seniority
+        //    //    if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
+        //    //    {
+        //    //        return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
+        //    //            ? LeaveConstants.SeniorRegularLeaveDays
+        //    //            : LeaveConstants.JuniorRegularLeaveDays;
+        //    //    }
+        //    //    else if (leaveType.Name == LeaveConstants.CasualLeave)
+        //    //    {
+        //    //        return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
+        //    //            ? LeaveConstants.SeniorCasualLeaveDays
+        //    //            : LeaveConstants.JuniorCasualLeaveDays;
+        //    //    }
+        //    //}
+
+        //    var defaultEntitlements = LeaveConstants.GetDefaultEntitlementDays();
+        //    if (defaultEntitlements.TryGetValue(leaveType.Name, out int days))
+        //    {
+        //        return days;
+        //    }
+
+        //    return 0;
+        //}
 
         private async Task<int> CountLeaveUsageAsync(Guid userId, Guid leaveTypeId)
         {

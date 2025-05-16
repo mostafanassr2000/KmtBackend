@@ -32,5 +32,7 @@ namespace KmtBackend.DAL.Entities
         // Computed property for remaining days
         [NotMapped]
         public decimal RemainingDays => TotalDays - UsedDays;
+
+        public DateTime NotUsedBefore { get; set; }
     }
 }

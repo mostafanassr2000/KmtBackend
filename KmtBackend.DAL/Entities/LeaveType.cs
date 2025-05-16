@@ -29,7 +29,7 @@ namespace KmtBackend.DAL.Entities
 
         public bool IsLimitedFrequency { get; set; }
 
-        public int? MinServiceMonths { get; set; }
+        //public int? MinServiceMonths { get; set; }
 
         public int? MaxUses { get; set; }
 

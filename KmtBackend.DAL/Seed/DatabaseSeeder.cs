@@ -198,7 +198,7 @@ namespace KmtBackend.DAL.Seed
                         IsGenderSpecific = leaveType.Value.IsGenderSpecific,
                         ApplicableGender = leaveType.Value.ApplicableGender,
                         IsLimitedFrequency = leaveType.Value.IsLimitedFrequency,
-                        MinServiceMonths = leaveType.Value.MinServiceMonths,
+                        //MinServiceMonths = leaveType.Value.MinServiceMonths,
                         MaxUses = leaveType.Value.MaxUses,
                         CreatedAt = DateTime.UtcNow
                     });
