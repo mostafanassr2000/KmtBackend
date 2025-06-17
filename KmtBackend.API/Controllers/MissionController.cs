@@ -160,7 +160,7 @@ namespace KmtBackend.API.Controllers
 
         [HttpPut("{id}/transportation")]
         [RequirePermission(Permissions.UpdateMissionTransportation)]
-        public async Task<IActionResult> UpdateTransportation(Guid id, UpdateMissionTransportationRequest request)
+        public async Task<IActionResult> UpdateTransportation(Guid id, UpdateMissionNoteRequest request)
         {
             try
             {

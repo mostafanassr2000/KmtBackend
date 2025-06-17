@@ -15,7 +15,9 @@ namespace KmtBackend.BLL.Managers.Interfaces
 
 
         Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request);
-        
+
+        Task<UserResponse> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request);
+
         Task<bool> DeleteUserAsync(Guid id);
     }
 }

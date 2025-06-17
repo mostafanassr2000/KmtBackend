@@ -116,6 +116,39 @@ namespace KmtBackend.API.Controllers
             }
         }
 
+        [HttpPut("{id}/Password")]
+        [RequirePermission(Permissions.UpdateUserPassword)]
+        public async Task<IActionResult> Update(Guid id, UpdateUserPasswordRequest request)
+        {
+            try
+            {
+                var user = await _userService.UpdateUserPasswordAsync(id, request);
+
+                return Ok(new ResponseWrapper<UserResponse>
+                {
+                    Data = user,
+                    Message = "Updated User Password Successfully.",
+                    Success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("not found"))
+                    return NotFound(new ResponseWrapper<UserResponse>
+                    {
+                        Message = "User Not Found",
+                        Success = false
+                    });
+
+                return BadRequest(new ResponseWrapper<UserResponse>
+                {
+                    Message = "Bad Request",
+                    Success = false,
+                    Errors = [ex.Message]
+                });
+            }
+        }
+
         [HttpDelete("{id}")]
         [RequirePermission(Permissions.DeleteUsers)]
         public async Task<IActionResult> Delete(Guid id)

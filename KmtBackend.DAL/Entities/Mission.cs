@@ -25,15 +25,8 @@ namespace KmtBackend.DAL.Entities
         [MaxLength(200)]
         public string Location { get; set; } = null!;
         
-        // Transportation details
-        [MaxLength(50)]
-        public string? VehicleNumber { get; set; }
-        
-        [MaxLength(100)]
-        public string? TransportationMethod { get; set; }
-        
         [MaxLength(500)]
-        public string? Comments { get; set; }
+        public string? Notes { get; set; }
         
         [Required]
         public Guid CreatedById { get; set; }

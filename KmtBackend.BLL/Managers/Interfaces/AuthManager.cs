@@ -14,7 +14,7 @@ namespace KmtBackend.BLL.Managers.Interfaces
         Task<PaginatedResult<MissionResponse>> GetMissionsByCreatorPaginatedAsync(Guid creatorId, PaginationQuery pagination);
         Task<PaginatedResult<MissionResponse>> GetMissionsByUserAssignmentPaginatedAsync(Guid userId, PaginationQuery pagination);
         Task<MissionResponse> UpdateMissionAsync(Guid id, UpdateMissionRequest request);
-        Task<MissionResponse> UpdateMissionTransportationAsync(Guid id, UpdateMissionTransportationRequest request);
+        Task<MissionResponse> UpdateMissionTransportationAsync(Guid id, UpdateMissionNoteRequest request);
         Task<bool> DeleteMissionAsync(Guid id);
         Task<IEnumerable<MissionAssignmentResponse>> AssignUsersToMissionAsync(Guid missionId, Guid assignerId, AssignUsersToMissionRequest request);
         Task<bool> RemoveUserFromMissionAsync(Guid missionId, Guid userId);

@@ -112,7 +112,7 @@ namespace KmtBackend.BLL.Managers
                 }
                 else
                 {
-                    notUsedBefore = user.HireDate.AddMonths(LeaveConstants.MonthsBeforeLeavesAreAvilable);
+                    notUsedBefore = user.HireDate.AddMonths(leaveType.MinServiceMonths ?? 0);
                 }
 
                 var balance = new LeaveBalance
@@ -220,15 +220,7 @@ namespace KmtBackend.BLL.Managers
                     {
                         DateTime notUsedBefore;
 
-                        if (leaveType.Name == LeaveConstants.TwoHourExcuse)
-                        {
-                            // Two Hour Excuse is available immediately
-                            notUsedBefore = user.HireDate;
-                        }
-                        else
-                        {
-                            notUsedBefore = user.HireDate.AddMonths(LeaveConstants.MonthsBeforeLeavesAreAvilable);
-                        }
+                        notUsedBefore = user.HireDate.AddMonths(leaveType.MinServiceMonths ?? 0);
 
                         var balance = new LeaveBalance
                         {
@@ -263,6 +255,16 @@ namespace KmtBackend.BLL.Managers
 
         private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
         {
+            if (leaveType.MinServiceMonths.HasValue)
+            {
+                int serviceMonths = CalculateServiceMonths(user);
+
+                if (serviceMonths < leaveType.MinServiceMonths.Value)
+                {
+                    return 0; // Not eligible due to insufficient service
+                }
+            }
+
             // For limited frequency leaves (like Two Hour Excuse)
             if (leaveType.IsLimitedFrequency && leaveType.MaxUses.HasValue)
             {
@@ -272,6 +274,25 @@ namespace KmtBackend.BLL.Managers
                 if (usedCount >= leaveType.MaxUses.Value)
                 {
                     return 0; // Already used up the maximum allowed times
+                }
+            }
+
+            if (leaveType.IsSeniorityBased)
+            {
+                int userAge = DateTime.UtcNow.Year - user.BirthDate.Year;
+
+                // Determine entitlement based on seniority
+                if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
+                {
+                    return userAge >= LeaveConstants.SeniorityYearsThreshold
+                        ? LeaveConstants.SeniorRegularLeaveDays
+                        : LeaveConstants.JuniorRegularLeaveDays;
+                }
+                else if (leaveType.Name == LeaveConstants.CasualLeave)
+                {
+                    return userAge >= LeaveConstants.SeniorityYearsThreshold
+                        ? LeaveConstants.SeniorCasualLeaveDays
+                        : LeaveConstants.JuniorCasualLeaveDays;
                 }
             }
 

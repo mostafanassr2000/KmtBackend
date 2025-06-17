@@ -147,7 +147,8 @@ namespace KmtBackend.DAL.Seed
                 PhoneNumber = "1010101010",
                 PriorWorkExperienceMonths = 24,
                 HireDate = DateTime.UtcNow,
-                Gender = Models.Enums.Gender.Male
+                Gender = Models.Enums.Gender.Male,
+                BirthDate = DateTime.UtcNow.AddYears(-30),
             };
 
             superAdmin.PasswordHash = passwordHasher.HashPassword(superAdmin, "Admin@123");

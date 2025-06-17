@@ -9,5 +9,6 @@
         public string DescriptionAr { get; set; } = null!;
         public bool IsSeniorityBased { get; set; }
         public bool AllowCarryOver { get; set; }
+        public int? MinServiceMonths { get; set; }
     }
 }

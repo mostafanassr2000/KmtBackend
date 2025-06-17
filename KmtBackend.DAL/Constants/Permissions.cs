@@ -8,6 +8,7 @@
         public const string CreateUsers = "users.create";
         public const string UpdateUsers = "users.update";
         public const string DeleteUsers = "users.delete";
+        public const string UpdateUserPassword = "users.update-password";
 
         #endregion
 
@@ -65,6 +66,7 @@
                 CreateUsers,
                 UpdateUsers,
                 DeleteUsers,
+                UpdateUserPassword,
 
                 ViewDepartments,
                 CreateDepartments,
@@ -102,6 +104,7 @@
                 [CreateUsers] = ("Create new users", "إنشاء مستخدمين جدد"),
                 [UpdateUsers] = ("Update existing users", "تحديث المستخدمين الحاليين"),
                 [DeleteUsers] = ("Delete users", "حذف المستخدمين"),
+                [UpdateUserPassword] = ("Update user password", "تحديث كلمة مرور المستخدم"),
 
                 [ViewDepartments] = ("View all departments", "عرض جميع الأقسام"),
                 [CreateDepartments] = ("Create new departments", "إنشاء أقسام جديدة"),

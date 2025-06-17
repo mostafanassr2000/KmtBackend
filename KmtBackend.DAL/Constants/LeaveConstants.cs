@@ -10,7 +10,7 @@ namespace KmtBackend.DAL.Constants
 
         public const string CasualLeave = "Casual Leave";
 
-        //public const string SickLeave = "Sick Leave";
+        public const string SickLeave = "Sick Leave";
 
         //public const string MaternityLeave = "Maternity Leave";
 
@@ -27,17 +27,17 @@ namespace KmtBackend.DAL.Constants
 
         #region Egyptian Labor Law Entitlement Rules
 
-        //public const int SeniorityYearsThreshold = 10;
+        public const int SeniorityYearsThreshold = 50;
 
         public const int JuniorRegularLeaveDays = 15;
 
-        //public const int SeniorRegularLeaveDays = 24;
+        public const int SeniorRegularLeaveDays = 24;
 
         public const int JuniorCasualLeaveDays = 6;
 
-        //public const int SeniorCasualLeaveDays = 6;
+        public const int SeniorCasualLeaveDays = 6;
 
-        //public const int SickLeaveDays = 180;
+        public const int SickLeaveDays = 180;
 
         //public const int MaternityLeaveDays = 90;
 
@@ -49,13 +49,13 @@ namespace KmtBackend.DAL.Constants
 
         public const int TwoHourExcuseDaysPerMonth = 1;
 
-        public const int MonthsBeforeLeavesAreAvilable = 12;
+        //public const int MonthsBeforeLeavesAreAvilable = 12;
 
         #endregion
 
-        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver, bool IsGenderSpecific, Gender? ApplicableGender, bool IsLimitedFrequency, /*int? MinServiceMonths,*/ int? MaxUses)> GetAllLeaveTypes()
+        public static Dictionary<string, (string NameAr, string Description, string DescriptionAr, bool IsSeniorityBased, bool AllowCarryOver, bool IsGenderSpecific, Gender? ApplicableGender, bool IsLimitedFrequency, int? MinServiceMonths, int? MaxUses)> GetAllLeaveTypes()
         {
-            return new Dictionary<string, (string, string, string, bool, bool, bool, Gender?, bool, /*int?,*/ int?)>
+            return new Dictionary<string, (string, string, string, bool, bool, bool, Gender?, bool, int?, int?)>
             {
                 [RegularAnnualLeave] = (
                     "إجازة اعتيادية",
@@ -66,21 +66,27 @@ namespace KmtBackend.DAL.Constants
                     false,  // IsGenderSpecific
                     null,   // ApplicableGender
                     false,  // IsLimitedFrequency
-                    //12,   // MinServiceMonths
+                    12,   // MinServiceMonths
                     null    // MaxUses
                 ),
                 [CasualLeave] = (
                     "إجازة عارضة",
                     "Emergency leave for unexpected circumstances",
                     "إجازة طارئة للظروف غير المتوقعة",
-                    false, false, false, null, false, /*12,*/ null
+                    false, false, false, null, false, 12, null
                 ),
-                //[SickLeave] = (
-                //    "إجازة مرضية",
-                //    "Leave for illness and medical reasons",
-                //    "إجازة للمرض والأسباب الطبية",
-                //    false, false, false, null, false, null, null
-                //),
+                [SickLeave] = (
+                    "إجازة مرضية",
+                    "Leave for illness and medical reasons",
+                    "إجازة للمرض والأسباب الطبية",
+                    false,
+                    false,
+                    false,
+                    null,
+                    false,
+                    null,
+                    null
+                ),
                 //[MaternityLeave] = (
                 //    "إجازة أمومة",
                 //    "Leave for childbirth and recovery",
@@ -126,7 +132,7 @@ namespace KmtBackend.DAL.Constants
                     false,  // IsGenderSpecific
                     null,   // ApplicableGender
                     true,   // IsLimitedFrequency
-                    //null,   // MinServiceMonths
+                    null,   // MinServiceMonths
                     1       // MaxUses per month
                 )
             };
@@ -138,7 +144,7 @@ namespace KmtBackend.DAL.Constants
             {
                 [RegularAnnualLeave] = JuniorRegularLeaveDays,
                 [CasualLeave] = JuniorCasualLeaveDays,
-                //[SickLeave] = SickLeaveDays,
+                [SickLeave] = SickLeaveDays,
                 //[MaternityLeave] = MaternityLeaveDays,
                 //[MarriageLeave] = MarriageLeaveDays,
                 //[BereavementLeave] = BereavementLeaveDays,

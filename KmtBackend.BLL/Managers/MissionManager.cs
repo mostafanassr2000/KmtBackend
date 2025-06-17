@@ -126,19 +126,12 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<MissionResponse>(updatedMission);
         }
 
-        public async Task<MissionResponse> UpdateMissionTransportationAsync(Guid id, UpdateMissionTransportationRequest request)
+        public async Task<MissionResponse> UpdateMissionTransportationAsync(Guid id, UpdateMissionNoteRequest request)
         {
             var mission = await _missionRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException("Mission not found");
-
-            // Update transportation-related fields if provided
-            if (request.VehicleNumber != null)
-                mission.VehicleNumber = request.VehicleNumber;
                 
-            if (request.TransportationMethod != null)
-                mission.TransportationMethod = request.TransportationMethod;
-                
-            if (request.Comments != null)
-                mission.Comments = request.Comments;
+            if (request.Notes != null)
+                mission.Notes = request.Notes;
 
             var updatedMission = await _missionRepository.UpdateAsync(mission);
             

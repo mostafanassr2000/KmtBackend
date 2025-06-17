@@ -126,18 +126,29 @@ namespace KmtBackend.BLL.Managers
             user.TerminationDate = request.TerminationDate ?? user.TerminationDate;
             user.HireDate = request.HireDate ?? user.HireDate;
             user.PriorWorkExperienceMonths = request.PriorWorkExperienceMonths ?? user.PriorWorkExperienceMonths;
+            user.BirthDate = request.BirthDate ?? user.BirthDate;
+
             if (request.PhoneNumber != null)
             {
                 user.PhoneNumber = PhoneNumberHelper.Normalize(request.PhoneNumber ?? "");
             }
-            
-            //if (!string.IsNullOrEmpty(request.Password))
-            //{
-            //    user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
-            //}
 
             var updatedUser = await _userRepository.UpdateAsync(user);
             
+            return _mapper.Map<UserResponse>(updatedUser);
+        }
+
+        public async Task<UserResponse> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request)
+        {
+            var user = await _userRepository.GetByIdAsync(id) ?? throw new Exception("User not found");
+
+            if (!string.IsNullOrEmpty(request.Password))
+            {
+                user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+            }
+
+            var updatedUser = await _userRepository.UpdateAsync(user);
+
             return _mapper.Map<UserResponse>(updatedUser);
         }
 

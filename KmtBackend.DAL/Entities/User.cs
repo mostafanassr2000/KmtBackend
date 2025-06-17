@@ -38,6 +38,9 @@ namespace KmtBackend.DAL.Entities
         [Required]
         public DateTime HireDate { get; set; }
 
+        [Required]
+        public DateTime BirthDate { get; set; }
+
         public DateTime? TerminationDate { get; set; }
 
         public virtual ICollection<LeaveBalance> LeaveBalances { get; set; } = [];
