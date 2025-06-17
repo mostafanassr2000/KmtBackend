@@ -1,8 +1,6 @@
 using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.Mission;
 using KmtBackend.Models.DTOs.Mission.KmtBackend.Models.DTOs.Mission;
-using System;
-using System.Threading.Tasks;
 
 namespace KmtBackend.BLL.Managers.Interfaces
 {
