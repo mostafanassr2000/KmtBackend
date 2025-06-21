@@ -12,6 +12,9 @@ namespace KmtBackend.Models.DTOs.Department
         // Updated description
         public string? Description { get; set; }
         public string? DescriptionAr { get; set; }
+
+        // Optional head of department
+        public Guid? HeadOfDepartmentId { get; set; }
     }
 }
 

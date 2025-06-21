@@ -68,5 +68,8 @@ namespace KmtBackend.DAL.Entities
         public virtual ICollection<MissionAssignment> MissionAssignments { get; set; } = [];
 
         public virtual ICollection<Mission> CreatedMissions { get; set; } = [];
+
+        // Departments that this user heads
+        public virtual ICollection<Department> HeadedDepartments { get; set; } = [];
     }
 }

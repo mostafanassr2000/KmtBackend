@@ -22,15 +22,18 @@ namespace KmtBackend.DAL.Repositories
         // Get department by ID
         public async Task<Department?> GetByIdAsync(Guid id)
         {
-            // Query database for department
+            // Query database for department with head of department
             return await _context.Departments
+                .Include(d => d.HeadOfDepartment)
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         // Get all departments
         public async Task<PaginatedResult<Department>> GetAllAsync(PaginationQuery pagination)
         {
-            var query = _context.Departments.AsNoTracking();
+            var query = _context.Departments
+                .Include(d => d.HeadOfDepartment)
+                .AsNoTracking();
 
             var totalCount = await query.CountAsync();
 

@@ -62,12 +62,23 @@ namespace KmtBackend.BLL.Managers
 
         public async Task<DepartmentResponse> CreateDepartmentAsync(CreateDepartmentRequest request)
         {
+            // Validate head of department if provided
+            if (request.HeadOfDepartmentId.HasValue)
+            {
+                var headOfDepartment = await _userRepository.GetByIdAsync(request.HeadOfDepartmentId.Value);
+                if (headOfDepartment == null)
+                {
+                    throw new Exception("Head of department user not found");
+                }
+            }
+
             var department = new Department
             {
                 Name = request.Name,
                 NameAr = request.NameAr,
                 Description = request.Description,
                 DescriptionAr = request.DescriptionAr,
+                HeadOfDepartmentId = request.HeadOfDepartmentId,
                 CreatedAt = DateTime.UtcNow
             };
             
@@ -84,10 +95,21 @@ namespace KmtBackend.BLL.Managers
         {
             var department = await _departmentRepository.GetByIdAsync(id) ?? throw new Exception("Department not found");
 
+            // Validate head of department if provided
+            if (request.HeadOfDepartmentId.HasValue)
+            {
+                var headOfDepartment = await _userRepository.GetByIdAsync(request.HeadOfDepartmentId.Value);
+                if (headOfDepartment == null)
+                {
+                    throw new Exception("Head of department user not found");
+                }
+            }
+
             department.Name = request.Name ?? department.Name;
             department.NameAr = request.NameAr ?? department.NameAr;
             department.Description = request.Description ?? department.Description;
             department.DescriptionAr = request.DescriptionAr ?? department.DescriptionAr;
+            department.HeadOfDepartmentId = request.HeadOfDepartmentId ?? department.HeadOfDepartmentId;
             department.UpdatedAt = DateTime.UtcNow;
             
             var updatedDepartment = await _departmentRepository.UpdateAsync(department);

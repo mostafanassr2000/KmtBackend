@@ -15,6 +15,10 @@ namespace KmtBackend.Models.DTOs.Department
         public DateTime? UpdatedAt { get; set; }
 
         public int UserCount { get; set; }
+
+        // Head of Department information
+        public Guid? HeadOfDepartmentId { get; set; }
+
     }
 }
 
