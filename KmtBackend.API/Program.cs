@@ -89,6 +89,11 @@ builder.Services.AddMappings();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+
+// Disable Entity Framework Core logging
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

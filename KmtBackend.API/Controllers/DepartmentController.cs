@@ -6,6 +6,7 @@ using KmtBackend.DAL.Constants;
 using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.Department;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KmtBackend.API.Controllers
 {
@@ -24,7 +25,9 @@ namespace KmtBackend.API.Controllers
         [RequirePermission(Permissions.ViewDepartments)]
         public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var departments = await _departmentService.GetAllDepartmentsAsync(pagination);
+            var currentUserId = GetCurrentUserId();
+            var departments = await _departmentService.GetAllDepartmentsAsync(pagination, currentUserId);
+            
             return Ok(new ResponseWrapper<IEnumerable<DepartmentResponse>>
             {
                 Data = departments.Items,
@@ -40,7 +43,8 @@ namespace KmtBackend.API.Controllers
         [RequirePermission(Permissions.ViewDepartments)]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var department = await _departmentService.GetDepartmentByIdAsync(id);
+            var currentUserId = GetCurrentUserId();
+            var department = await _departmentService.GetDepartmentByIdAsync(id, currentUserId);
             
             if (department == null)
                 return NotFound(new ResponseWrapper<DepartmentResponse>
@@ -129,6 +133,12 @@ namespace KmtBackend.API.Controllers
                 });
 
             return NoContent();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.Parse(userIdClaim ?? Guid.Empty.ToString());
         }
     }
 }

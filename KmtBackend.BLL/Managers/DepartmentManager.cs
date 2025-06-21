@@ -12,22 +12,31 @@ namespace KmtBackend.BLL.Managers
     {
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IDepartmentFilteringService _departmentFilteringService;
         private readonly IMapper _mapper;
 
         public DepartmentManager(
             IDepartmentRepository departmentRepository,
             IUserRepository userRepository,
+            IDepartmentFilteringService departmentFilteringService,
             IMapper mapper)
         {
             _departmentRepository = departmentRepository;
             _userRepository = userRepository;
+            _departmentFilteringService = departmentFilteringService;
             _mapper = mapper;
         }
 
-        public async Task<DepartmentResponse?> GetDepartmentByIdAsync(Guid id)
+        public async Task<DepartmentResponse?> GetDepartmentByIdAsync(Guid id, Guid currentUserId)
         {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null) return null;
+
+            // Check if user has access to this department
+            if (!_departmentFilteringService.HasDepartmentAccess(currentUser, id))
+                return null;
+
             var department = await _departmentRepository.GetByIdAsync(id);
-            
             if (department == null) return null;
             
             var response = _mapper.Map<DepartmentResponse>(department);
@@ -38,26 +47,72 @@ namespace KmtBackend.BLL.Managers
             return response;
         }
 
+        public async Task<PaginatedResult<DepartmentResponse>> GetAllDepartmentsAsync(PaginationQuery pagination, Guid currentUserId)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null)
+                return new PaginatedResult<DepartmentResponse> { Items = new List<DepartmentResponse>() };
+
+            var accessibleDepartmentIds = _departmentFilteringService.GetAccessibleDepartmentIds(currentUser);
+            
+            // If empty, it means super admin (no filtering)
+            if (!accessibleDepartmentIds.Any())
+            {
+                var departments = await _departmentRepository.GetAllAsync(pagination);
+                var responses = _mapper.Map<IEnumerable<DepartmentResponse>>(departments.Items).ToList();
+                
+                var allUsers = await _userRepository.GetAllAsync();
+                foreach (var response in responses)
+                {
+                    response.UserCount = allUsers.Count(u => u.DepartmentId == response.Id);
+                }
+
+                return new PaginatedResult<DepartmentResponse>
+                {
+                    Items = responses,
+                    PageNumber = departments.PageNumber,
+                    PageSize = departments.PageSize,
+                    TotalRecords = departments.TotalRecords
+                };
+            }
+            else
+            {
+                // Filter by accessible departments
+                var departments = await _departmentRepository.GetByIdsAsync(accessibleDepartmentIds);
+                var responses = _mapper.Map<IEnumerable<DepartmentResponse>>(departments).ToList();
+                
+                var allUsers = await _userRepository.GetAllAsync();
+                foreach (var response in responses)
+                {
+                    response.UserCount = allUsers.Count(u => u.DepartmentId == response.Id);
+                }
+
+                // Apply pagination manually
+                var totalCount = responses.Count;
+                var items = responses
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToList();
+
+                return new PaginatedResult<DepartmentResponse>
+                {
+                    Items = items,
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRecords = totalCount
+                };
+            }
+        }
+
+        // Keep existing methods for backward compatibility
+        public async Task<DepartmentResponse?> GetDepartmentByIdAsync(Guid id)
+        {
+            return await GetDepartmentByIdAsync(id, Guid.Empty);
+        }
+
         public async Task<PaginatedResult<DepartmentResponse>> GetAllDepartmentsAsync(PaginationQuery pagination)
         {
-            var departments = await _departmentRepository.GetAllAsync(pagination);
-            
-            var responses = _mapper.Map<IEnumerable<DepartmentResponse>>(departments.Items).ToList();
-            
-            var allUsers = await _userRepository.GetAllAsync();
-            
-            foreach (var response in responses)
-            {
-                response.UserCount = allUsers.Count(u => u.DepartmentId == response.Id);
-            }
-
-            return new PaginatedResult<DepartmentResponse>
-            {
-                Items = responses,
-                PageNumber = departments.PageNumber,
-                PageSize = departments.PageSize,
-                TotalRecords = departments.TotalRecords
-            };
+            return await GetAllDepartmentsAsync(pagination, Guid.Empty);
         }
 
         public async Task<DepartmentResponse> CreateDepartmentAsync(CreateDepartmentRequest request)

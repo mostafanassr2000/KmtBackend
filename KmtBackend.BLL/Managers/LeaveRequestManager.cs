@@ -17,6 +17,7 @@ namespace KmtBackend.BLL.Managers
         private readonly ILeaveBalanceRepository _leaveBalanceRepository;
         private readonly ILeaveTypeRepository _leaveTypeRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IDepartmentFilteringService _departmentFilteringService;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -26,7 +27,8 @@ namespace KmtBackend.BLL.Managers
             IUserRepository userRepository,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            ILeaveTypeRepository leaveTypeRepository)
+            ILeaveTypeRepository leaveTypeRepository,
+            IDepartmentFilteringService departmentFilteringService)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _leaveBalanceRepository = leaveBalanceRepository;
@@ -34,110 +36,96 @@ namespace KmtBackend.BLL.Managers
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _leaveTypeRepository = leaveTypeRepository;
+            _departmentFilteringService = departmentFilteringService;
         }
 
-        //public async Task<LeaveRequestResponse> CreateLeaveRequestAsync(Guid userId, CreateLeaveRequestRequest request)
-        //{
-        //    // Validate user exists
-        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
+        public async Task<LeaveRequestResponse?> GetLeaveRequestByIdAsync(Guid id, Guid currentUserId)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null) return null;
 
-        //    // Get leave type
-        //    var leaveType = await _leaveTypeRepository.GetByIdAsync(request.LeaveTypeId) ??
-        //        throw new KeyNotFoundException("Leave type not found");
+            var leaveRequest = await _leaveRequestRepository.GetByIdAsync(id);
+            if (leaveRequest == null) return null;
 
-        //    int days;
-        //    TimeSpan? startTime = null;
-        //    TimeSpan? endTime = null;
-        //    int? month = null;
-        //    bool isHourlyLeave = false;
+            // Check if current user has access to this leave request
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
+            
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                return _mapper.Map<LeaveRequestResponse>(leaveRequest);
+            }
+            else
+            {
+                // Check if the leave request belongs to an accessible user
+                if (!accessibleUserIds.Contains(leaveRequest.UserId))
+                    return null;
 
-        //    // Two-Hour Excuse handling
-        //    if (leaveType.Name == LeaveConstants.TwoHourExcuse)
-        //    {
-        //        if (!request.IsHourlyLeave || !request.StartTime.HasValue)
-        //        {
-        //            throw new InvalidOperationException("Start time must be provided for two-hour excuses");
-        //        }
+                return _mapper.Map<LeaveRequestResponse>(leaveRequest);
+            }
+        }
 
-        //        isHourlyLeave = true;
-        //        startTime = request.StartTime;
-        //        endTime = startTime.Value.Add(TimeSpan.FromHours(2)); // Automatically calculate end time
+        public async Task<PaginatedResult<LeaveRequestResponse>> GetAllLeaveRequestsPaginatedAsync(PaginationQuery pagination, Guid currentUserId)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null)
+                return new PaginatedResult<LeaveRequestResponse> { Items = new List<LeaveRequestResponse>() };
 
-        //        // Set current month for monthly tracking
-        //        month = DateTime.Now.Month;
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
+            
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                var result = await _leaveRequestRepository.GetAllPaginatedAsync(pagination);
+                var responses = _mapper.Map<IEnumerable<LeaveRequestResponse>>(result.Items).ToList();
+                
+                return new PaginatedResult<LeaveRequestResponse>
+                {
+                    Items = responses,
+                    PageNumber = result.PageNumber,
+                    PageSize = result.PageSize,
+                    TotalRecords = result.TotalRecords
+                };
+            }
+            else
+            {
+                // Filter by accessible users
+                var filteredRequests = new List<LeaveRequestResponse>();
+                
+                foreach (var userId in accessibleUserIds)
+                {
+                    var userRequests = await _leaveRequestRepository.GetByUserIdAsync(userId);
+                    var userRequestResponses = _mapper.Map<IEnumerable<LeaveRequestResponse>>(userRequests);
+                    filteredRequests.AddRange(userRequestResponses);
+                }
 
-        //        // Check if user already used their excuse this month
-        //        var existingExcuses = await _leaveRequestRepository.GetByUserIdAsync(userId);
-        //        bool alreadyUsedThisMonth = existingExcuses.Any(r =>
-        //            r.LeaveTypeId == request.LeaveTypeId &&
-        //            r.Month == month &&
-        //            r.StartDate.Year == DateTime.Now.Year &&
-        //            (r.Status == LeaveRequestStatus.Approved || r.Status == LeaveRequestStatus.Pending));
+                // Apply pagination manually
+                var totalCount = filteredRequests.Count;
+                var items = filteredRequests
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToList();
 
-        //        if (alreadyUsedThisMonth)
-        //        {
-        //            throw new InvalidOperationException($"You have already used or requested your two-hour excuse for this month");
-        //        }
+                return new PaginatedResult<LeaveRequestResponse>
+                {
+                    Items = items,
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRecords = totalCount
+                };
+            }
+        }
 
-        //        // For two-hour excuses, we convert to days (0.25 days = 2 hours in an 8-hour workday)
-        //        days = 1; // We'll keep days = 1 in DB but deduct 0.25 from regular leave balance when approved
-        //    }
-        //    else
-        //    {
-        //        // Regular leave handling
-        //        days = (int)(request.EndDate.Date - request.StartDate.Date).TotalDays + 1;
+        // Keep existing methods for backward compatibility
+        public async Task<LeaveRequestResponse?> GetLeaveRequestByIdAsync(Guid id)
+        {
+            return await GetLeaveRequestByIdAsync(id, Guid.Empty);
+        }
 
-        //        if (days <= 0)
-        //        {
-        //            throw new ArgumentException("End date must be after start date");
-        //        }
-        //    }
-
-        //    // Get the user's leave balance for regular leaves
-        //    var currentYear = DateTime.Now.Year;
-
-        //    // For two-hour excuses, check regular leave balance instead of excuse balance
-        //    Guid balanceLeaveTypeId = leaveType.Name == LeaveConstants.TwoHourExcuse ?
-        //        (await _leaveTypeRepository.GetByNameAsync(LeaveConstants.RegularAnnualLeave))!.Id :
-        //        request.LeaveTypeId;
-
-        //    var leaveBalance = await _leaveBalanceRepository.GetUserBalanceAsync(userId, balanceLeaveTypeId, currentYear) ??
-        //        throw new InvalidOperationException("No leave balance found for this leave type");
-
-        //    // For two-hour excuses, check if user has at least 0.25 days of regular leave
-        //    decimal requiredDays = leaveType.Name == LeaveConstants.TwoHourExcuse ? 0.25m : days;
-
-        //    if (leaveBalance.RemainingDays < requiredDays && leaveType.Name == LeaveConstants.TwoHourExcuse)
-        //    {
-        //        throw new InvalidOperationException($"Insufficient regular leave balance for two-hour excuse");
-        //    }
-        //    else if (leaveBalance.RemainingDays < days)
-        //    {
-        //        throw new InvalidOperationException($"Insufficient leave balance. Available: {leaveBalance.RemainingDays}, Requested: {days}");
-        //    }
-
-        //    // Create the leave request
-        //    var leaveRequest = new LeaveRequest
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        UserId = userId,
-        //        LeaveTypeId = request.LeaveTypeId,
-        //        StartDate = request.StartDate,
-        //        EndDate = request.EndDate,
-        //        Days = days,
-        //        Status = LeaveRequestStatus.Pending,
-        //        IsHourlyLeave = isHourlyLeave,
-        //        StartTime = startTime,
-        //        EndTime = endTime,
-        //        Month = month,
-        //        CreatedAt = DateTime.UtcNow
-        //    };
-
-        //    var createdRequest = await _leaveRequestRepository.CreateAsync(leaveRequest);
-
-        //    return _mapper.Map<LeaveRequestResponse>(createdRequest);
-        //}
-
+        public async Task<PaginatedResult<LeaveRequestResponse>> GetAllLeaveRequestsPaginatedAsync(PaginationQuery pagination)
+        {
+            return await GetAllLeaveRequestsPaginatedAsync(pagination, Guid.Empty);
+        }
 
         public async Task<LeaveRequestResponse> CreateLeaveRequestAsync(Guid userId, CreateLeaveRequestRequest request)
         {
@@ -206,8 +194,8 @@ namespace KmtBackend.BLL.Managers
             var leaveBalance = await _leaveBalanceRepository.GetUserBalanceAsync(userId, balanceLeaveTypeId, currentYear) ??
                 throw new InvalidOperationException("No leave balance found for this leave type");
 
-            // Check if the leave is available yet based on NotUsedBefore date
-            if (request.StartDate < leaveBalance.NotUsedBefore)
+            // Check if leave balance is available for use
+            if (leaveBalance.NotUsedBefore > DateTime.Now)
             {
                 throw new InvalidOperationException(
                     $"This leave balance is not available until {leaveBalance.NotUsedBefore.ToShortDateString()}");
@@ -244,15 +232,6 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<LeaveRequestResponse>(createdRequest);
         }
 
-
-        public async Task<LeaveRequestResponse?> GetLeaveRequestByIdAsync(Guid id)
-        {
-            var leaveRequest = await _leaveRequestRepository.GetByIdAsync(id);
-            if (leaveRequest == null) return null;
-            
-            return _mapper.Map<LeaveRequestResponse>(leaveRequest);
-        }
-
         public async Task<PaginatedResult<LeaveRequestResponse>> GetUserLeaveRequestsPaginatedAsync(Guid userId, PaginationQuery pagination)
         {
             var result = await _leaveRequestRepository.GetByUserIdPaginatedAsync(userId, pagination);
@@ -271,21 +250,6 @@ namespace KmtBackend.BLL.Managers
         public async Task<PaginatedResult<LeaveRequestResponse>> GetDepartmentLeaveRequestsPaginatedAsync(Guid departmentId, PaginationQuery pagination)
         {
             var result = await _leaveRequestRepository.GetByDepartmentIdPaginatedAsync(departmentId, pagination);
-            
-            var responses = _mapper.Map<IEnumerable<LeaveRequestResponse>>(result.Items).ToList();
-            
-            return new PaginatedResult<LeaveRequestResponse>
-            {
-                Items = responses,
-                PageNumber = result.PageNumber,
-                PageSize = result.PageSize,
-                TotalRecords = result.TotalRecords
-            };
-        }
-
-        public async Task<PaginatedResult<LeaveRequestResponse>> GetAllLeaveRequestsPaginatedAsync(PaginationQuery pagination)
-        {
-            var result = await _leaveRequestRepository.GetAllPaginatedAsync(pagination);
             
             var responses = _mapper.Map<IEnumerable<LeaveRequestResponse>>(result.Items).ToList();
             
@@ -353,7 +317,6 @@ namespace KmtBackend.BLL.Managers
 
             return _mapper.Map<LeaveRequestResponse>(updatedRequest);
         }
-
 
         public async Task<LeaveRequestResponse> RejectLeaveRequestAsync(Guid id, RejectLeaveRequestRequest request)
         {

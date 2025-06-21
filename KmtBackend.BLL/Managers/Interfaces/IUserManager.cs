@@ -8,11 +8,12 @@ namespace KmtBackend.BLL.Managers.Interfaces
         Task<UserResponse> CreateUserAsync(CreateUserRequest request);
         
         Task<UserResponse?> GetUserByIdAsync(Guid id);
+        Task<UserResponse?> GetUserByIdAsync(Guid id, Guid currentUserId);
         
         Task<IEnumerable<UserResponse>> GetAllUsersAsync();
 
         Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination);
-
+        Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination, Guid currentUserId);
 
         Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request);
 

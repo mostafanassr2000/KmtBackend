@@ -3,6 +3,7 @@ using KmtBackend.BLL.Managers.Interfaces;
 using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.Leave;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KmtBackend.API.Controllers
 {
@@ -35,7 +36,8 @@ namespace KmtBackend.API.Controllers
         //[RequirePermission(Permissions.ViewLeaveBalances)]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var leaveBalance = await _leaveBalanceManager.GetLeaveBalanceByIdAsync(id);
+            var currentUserId = GetCurrentUserId();
+            var leaveBalance = await _leaveBalanceManager.GetLeaveBalanceByIdAsync(id, currentUserId);
             
             if (leaveBalance == null)
             {
@@ -50,6 +52,21 @@ namespace KmtBackend.API.Controllers
             {
                 Data = leaveBalance,
                 Message = "Retrieved leave balance successfully",
+                Success = true
+            });
+        }
+
+        [HttpGet]
+        //[RequirePermission(Permissions.ViewLeaveBalances)]
+        public async Task<IActionResult> GetAll([FromQuery] int? year = null)
+        {
+            var currentUserId = GetCurrentUserId();
+            var leaveBalances = await _leaveBalanceManager.GetAllLeaveBalancesAsync(currentUserId, year);
+            
+            return Ok(new ResponseWrapper<IEnumerable<LeaveBalanceResponse>>
+            {
+                Data = leaveBalances,
+                Message = "Retrieved leave balances successfully",
                 Success = true
             });
         }
@@ -103,6 +120,12 @@ namespace KmtBackend.API.Controllers
                 Message = $"Reset {count} leave balances for year {targetYear}",
                 Success = true
             });
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.Parse(userIdClaim ?? Guid.Empty.ToString());
         }
     }
 }

@@ -22,6 +22,9 @@ namespace KmtBackend.API.ServicesExtension
             services.AddScoped<ILeaveBalanceManager, LeaveBalanceManager>();
             services.AddScoped<ILeaveRequestManager, LeaveRequestManager>();
             services.AddScoped<IMissionManager, MissionManager>();
+            
+            // Register the department filtering service
+            services.AddScoped<IDepartmentFilteringService, DepartmentFilteringService>();
         }
 
         public static void RegisterRepositories(this IServiceCollection services)

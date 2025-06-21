@@ -28,6 +28,15 @@ namespace KmtBackend.DAL.Repositories
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
+        // Get departments by IDs
+        public async Task<IEnumerable<Department>> GetByIdsAsync(IEnumerable<Guid> ids)
+        {
+            return await _context.Departments
+                .Include(d => d.HeadOfDepartment)
+                .Where(d => ids.Contains(d.Id))
+                .ToListAsync();
+        }
+
         // Get all departments
         public async Task<PaginatedResult<Department>> GetAllAsync(PaginationQuery pagination)
         {

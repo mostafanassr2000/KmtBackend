@@ -24,7 +24,8 @@ namespace KmtBackend.API.Controllers
         //[RequirePermission(Permissions.ViewAllLeaveRequests)]
         public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var result = await _leaveRequestManager.GetAllLeaveRequestsPaginatedAsync(pagination);
+            var currentUserId = GetCurrentUserId();
+            var result = await _leaveRequestManager.GetAllLeaveRequestsPaginatedAsync(pagination, currentUserId);
             
             return Ok(new ResponseWrapper<IEnumerable<LeaveRequestResponse>>
             {
@@ -41,7 +42,8 @@ namespace KmtBackend.API.Controllers
         //[RequirePermission(Permissions.ViewLeaveRequests)]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var leaveRequest = await _leaveRequestManager.GetLeaveRequestByIdAsync(id);
+            var currentUserId = GetCurrentUserId();
+            var leaveRequest = await _leaveRequestManager.GetLeaveRequestByIdAsync(id, currentUserId);
             
             if (leaveRequest == null)
             {
@@ -226,6 +228,12 @@ namespace KmtBackend.API.Controllers
                     Errors = [ex.Message]
                 });
             }
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.Parse(userIdClaim ?? Guid.Empty.ToString());
         }
     }
 }

@@ -7,6 +7,7 @@ namespace KmtBackend.DAL.Repositories.Interfaces
     {
         Task<LeaveBalance?> GetByIdAsync(Guid id);
         Task<IEnumerable<LeaveBalance>> GetByUserIdAsync(Guid userId, int? year = null);
+        Task<IEnumerable<LeaveBalance>> GetAllAsync(int? year = null);
         Task<LeaveBalance?> GetUserBalanceAsync(Guid userId, Guid leaveTypeId, int year);
         Task<PaginatedResult<LeaveBalance>> GetAllPaginatedAsync(PaginationQuery pagination);
         Task<LeaveBalance> CreateAsync(LeaveBalance leaveBalance);

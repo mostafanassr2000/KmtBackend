@@ -9,6 +9,9 @@ namespace KmtBackend.DAL.Repositories.Interfaces
         // Get department by ID
         Task<Department?> GetByIdAsync(Guid id);
 
+        // Get departments by IDs
+        Task<IEnumerable<Department>> GetByIdsAsync(IEnumerable<Guid> ids);
+
         // Get all departments
         Task<PaginatedResult<Department>> GetAllAsync(PaginationQuery pagination);
         

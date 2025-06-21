@@ -6,6 +6,7 @@ using KmtBackend.Models.DTOs.Common;
 using KmtBackend.Models.DTOs.Role;
 using KmtBackend.Models.DTOs.User;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KmtBackend.API.Controllers
 {
@@ -24,11 +25,13 @@ namespace KmtBackend.API.Controllers
         [RequirePermission(Permissions.ViewUsers)]
         public async Task<IActionResult> GetAll([FromQuery] PaginationQuery pagination)
         {
-            var users = await _userService.GetAllUsersPaginatedAsync(pagination);
+            var currentUserId = GetCurrentUserId();
+            var users = await _userService.GetAllUsersPaginatedAsync(pagination, currentUserId);
+            
             return Ok(new ResponseWrapper<IEnumerable<UserResponse>>
             {
                 Data = users.Items,
-                Message = "Retrieved Roles Successfully.",
+                Message = "Retrieved Users Successfully.",
                 Success = true,
                 PageNumber = users.PageNumber,
                 PageSize = users.PageSize,
@@ -40,7 +43,8 @@ namespace KmtBackend.API.Controllers
         [RequirePermission(Permissions.ViewUsers)]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var currentUserId = GetCurrentUserId();
+            var user = await _userService.GetUserByIdAsync(id, currentUserId);
 
             if (user == null)
                 return NotFound(new ResponseWrapper<UserResponse>
@@ -163,6 +167,12 @@ namespace KmtBackend.API.Controllers
                 });
 
             return NoContent();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.Parse(userIdClaim ?? Guid.Empty.ToString());
         }
     }
 }

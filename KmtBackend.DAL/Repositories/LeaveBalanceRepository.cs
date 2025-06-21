@@ -36,6 +36,21 @@ namespace KmtBackend.DAL.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<IEnumerable<LeaveBalance>> GetAllAsync(int? year = null)
+        {
+            var query = _context.LeaveBalances
+                .Include(lb => lb.User)
+                .Include(lb => lb.LeaveType)
+                .AsNoTracking();
+
+            if (year.HasValue)
+            {
+                query = query.Where(lb => lb.Year == year);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<LeaveBalance?> GetUserBalanceAsync(Guid userId, Guid leaveTypeId, int year)
         {
             return await _context.LeaveBalances

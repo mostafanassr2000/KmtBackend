@@ -15,6 +15,7 @@ namespace KmtBackend.BLL.Managers
         private readonly ILeaveTypeRepository _leaveTypeRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
+        private readonly IDepartmentFilteringService _departmentFilteringService;
         private readonly IMapper _mapper;
 
         public LeaveBalanceManager(
@@ -22,29 +23,88 @@ namespace KmtBackend.BLL.Managers
             ILeaveTypeRepository leaveTypeRepository,
             IUserRepository userRepository,
             IMapper mapper,
-            ILeaveRequestRepository leaveRequestRepository)
+            ILeaveRequestRepository leaveRequestRepository,
+            IDepartmentFilteringService departmentFilteringService)
         {
             _leaveBalanceRepository = leaveBalanceRepository;
             _leaveTypeRepository = leaveTypeRepository;
             _userRepository = userRepository;
             _mapper = mapper;
             _leaveRequestRepository = leaveRequestRepository;
+            _departmentFilteringService = departmentFilteringService;
         }
 
-        public async Task<LeaveBalanceResponse?> GetLeaveBalanceByIdAsync(Guid id)
+        public async Task<LeaveBalanceResponse?> GetLeaveBalanceByIdAsync(Guid id, Guid currentUserId)
         {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null) return null;
+
             var leaveBalance = await _leaveBalanceRepository.GetByIdAsync(id);
             if (leaveBalance == null) return null;
+
+            // Check if current user has access to this leave balance
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
             
-            return _mapper.Map<LeaveBalanceResponse>(leaveBalance);
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                return _mapper.Map<LeaveBalanceResponse>(leaveBalance);
+            }
+            else
+            {
+                // Check if the leave balance belongs to an accessible user
+                if (!accessibleUserIds.Contains(leaveBalance.UserId))
+                    return null;
+
+                return _mapper.Map<LeaveBalanceResponse>(leaveBalance);
+            }
+        }
+
+        public async Task<IEnumerable<LeaveBalanceResponse>> GetAllLeaveBalancesAsync(Guid currentUserId, int? year = null)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null)
+                return Enumerable.Empty<LeaveBalanceResponse>();
+
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
+            
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                var allBalances = await _leaveBalanceRepository.GetAllAsync(year);
+                return _mapper.Map<IEnumerable<LeaveBalanceResponse>>(allBalances);
+            }
+            else
+            {
+                // Filter by accessible users
+                var filteredBalances = new List<LeaveBalanceResponse>();
+                
+                foreach (var userId in accessibleUserIds)
+                {
+                    var userBalances = await _leaveBalanceRepository.GetByUserIdAsync(userId, year);
+                    var userBalanceResponses = _mapper.Map<IEnumerable<LeaveBalanceResponse>>(userBalances);
+                    filteredBalances.AddRange(userBalanceResponses);
+                }
+
+                return filteredBalances;
+            }
+        }
+
+        // Keep existing methods for backward compatibility
+        public async Task<LeaveBalanceResponse?> GetLeaveBalanceByIdAsync(Guid id)
+        {
+            return await GetLeaveBalanceByIdAsync(id, Guid.Empty);
+        }
+
+        public async Task<IEnumerable<LeaveBalanceResponse>> GetAllLeaveBalancesAsync()
+        {
+            return await GetAllLeaveBalancesAsync(Guid.Empty);
         }
 
         public async Task<IEnumerable<LeaveBalanceResponse>> GetUserLeaveBalancesAsync(Guid userId, int? year)
         {
             var balances = await _leaveBalanceRepository.GetByUserIdAsync(userId, year);
-                
             var responses = balances.Select(_mapper.Map<LeaveBalanceResponse>);
-
             return responses;
         }
 
@@ -63,35 +123,6 @@ namespace KmtBackend.BLL.Managers
             
             return _mapper.Map<LeaveBalanceResponse>(updatedBalance);
         }
-
-        //public async Task<bool> CreateInitialBalancesForUserAsync(Guid userId)
-        //{
-        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found");
-
-        //    var currentYear = DateTime.Now.Year;
-
-        //    var leaveTypes = await _leaveTypeRepository.GetAllAsync();
-
-        //    foreach (var leaveType in leaveTypes)
-        //    {
-        //        int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, currentYear);
-
-        //        var balance = new LeaveBalance
-        //        {
-        //            Id = Guid.NewGuid(),
-        //            UserId = user.Id,
-        //            LeaveTypeId = leaveType.Id,
-        //            Year = currentYear,
-        //            TotalDays = entitledDays,
-        //            UsedDays = 0,
-        //            CreatedAt = DateTime.UtcNow
-        //        };
-
-        //        await _leaveBalanceRepository.CreateAsync(balance);
-        //    }
-
-        //    return true;
-        //}
 
         public async Task<bool> CreateInitialBalancesForUserAsync(Guid userId)
         {
@@ -132,73 +163,6 @@ namespace KmtBackend.BLL.Managers
 
             return true;
         }
-
-        //public async Task<int> ResetAllUserBalancesAsync(int year)
-        //{
-        //    var users = await _userRepository.GetAllAsync();
-        //    var activeUsers = users.Where(u => u.TerminationDate == null || u.TerminationDate > DateTime.UtcNow);
-
-        //    int count = 0;
-
-        //    foreach (var user in activeUsers)
-        //    {
-        //        // Get leave types
-        //        var leaveTypes = await _leaveTypeRepository.GetAllAsync();
-
-        //        foreach (var leaveType in leaveTypes)
-        //        {
-        //            // Check if balance already exists
-        //            var existingBalance = await _leaveBalanceRepository.GetUserBalanceAsync(user.Id, leaveType.Id, year);
-
-        //            int entitledDays = await CalculateEligibleLeaveDaysAsync(user, leaveType, year);
-
-        //            if (existingBalance == null)
-        //            {
-        //                // Create new balance
-        //                var balance = new LeaveBalance
-        //                {
-        //                    Id = Guid.NewGuid(),
-        //                    UserId = user.Id,
-        //                    LeaveTypeId = leaveType.Id,
-        //                    Year = year,
-        //                    TotalDays = entitledDays,
-        //                    UsedDays = 0,
-        //                    CreatedAt = DateTime.UtcNow
-        //                };
-
-        //                await _leaveBalanceRepository.CreateAsync(balance);
-        //            }
-        //            else
-        //            {
-        //                // Handle carry-over if applicable
-        //                int carryOverDays = 0;
-
-        //                //if (leaveType.AllowCarryOver && year > DateTime.Now.Year - 1)
-        //                //{
-        //                //    // Check previous year balance
-        //                //    var previousYearBalance = await _leaveBalanceRepository.GetUserBalanceAsync(
-        //                //        user.Id, leaveType.Id, year - 1);
-
-        //                //    if (previousYearBalance != null && previousYearBalance.RemainingDays > 0)
-        //                //    {
-        //                //        carryOverDays = Math.Min(previousYearBalance.RemainingDays, 10); // Max 10 days carried over
-        //                //    }
-        //                //}
-
-        //                // Update existing balance
-        //                existingBalance.TotalDays = entitledDays + carryOverDays;
-        //                existingBalance.UsedDays = 0;
-        //                existingBalance.UpdatedAt = DateTime.UtcNow;
-
-        //                await _leaveBalanceRepository.UpdateAsync(existingBalance);
-        //            }
-
-        //            count++;
-        //        }
-        //    }
-
-        //    return count;
-        //}
 
         public async Task<int> ResetAllUserBalancesAsync(int year)
         {
@@ -252,7 +216,6 @@ namespace KmtBackend.BLL.Managers
             return count;
         }
 
-
         private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
         {
             if (leaveType.MinServiceMonths.HasValue)
@@ -305,63 +268,6 @@ namespace KmtBackend.BLL.Managers
 
             return 0;
         }
-
-        //private async Task<int> CalculateEligibleLeaveDaysAsync(User user, LeaveType leaveType, int year)
-        //{
-        //    //if (leaveType.IsGenderSpecific && leaveType.ApplicableGender.HasValue && user.Gender != leaveType.ApplicableGender.Value)
-        //    //{
-        //    //    return 0; // Not eligible due to gender mismatch
-        //    //}
-
-        //    if (leaveType.MinServiceMonths.HasValue)
-        //    {
-        //        int serviceYears = CalculateServiceMonths(user);
-
-        //        if (serviceYears < leaveType.MinServiceMonths.Value)
-        //        {
-        //            return 0; // Not eligible due to insufficient service
-        //        }
-        //    }
-
-        //    if (leaveType.IsLimitedFrequency && leaveType.MaxUses.HasValue)
-        //    {
-        //        // Count how many times this user has used this leave type
-        //        int usedCount = await CountLeaveUsageAsync(user.Id, leaveType.Id);
-
-        //        if (usedCount >= leaveType.MaxUses.Value)
-        //        {
-        //            return 0; // Already used up the maximum allowed times
-        //        }
-        //    }
-
-        //    //if (leaveType.IsSeniorityBased)
-        //    //{
-        //    //    // Calculate total work experience (including prior experience)
-        //    //    int totalYearsExperience = user.TotalWorkExperienceYears;
-
-        //    //    // Determine entitlement based on seniority
-        //    //    if (leaveType.Name == LeaveConstants.RegularAnnualLeave)
-        //    //    {
-        //    //        return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-        //    //            ? LeaveConstants.SeniorRegularLeaveDays
-        //    //            : LeaveConstants.JuniorRegularLeaveDays;
-        //    //    }
-        //    //    else if (leaveType.Name == LeaveConstants.CasualLeave)
-        //    //    {
-        //    //        return totalYearsExperience >= LeaveConstants.SeniorityYearsThreshold
-        //    //            ? LeaveConstants.SeniorCasualLeaveDays
-        //    //            : LeaveConstants.JuniorCasualLeaveDays;
-        //    //    }
-        //    //}
-
-        //    var defaultEntitlements = LeaveConstants.GetDefaultEntitlementDays();
-        //    if (defaultEntitlements.TryGetValue(leaveType.Name, out int days))
-        //    {
-        //        return days;
-        //    }
-
-        //    return 0;
-        //}
 
         private async Task<int> CountLeaveUsageAsync(Guid userId, Guid leaveTypeId)
         {

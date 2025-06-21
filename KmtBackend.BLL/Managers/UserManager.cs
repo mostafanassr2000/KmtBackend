@@ -12,16 +12,102 @@ namespace KmtBackend.BLL.Managers
     public class UserManager : IUserManager
     {
         private readonly IUserRepository _userRepository;
+        private readonly IDepartmentFilteringService _departmentFilteringService;
         private readonly IMapper _mapper;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly ILeaveBalanceManager _leaveBalanceManager;
 
-        public UserManager(IUserRepository userRepository, IMapper mapper, ILeaveBalanceManager leaveBalanceManager)
+        public UserManager(
+            IUserRepository userRepository, 
+            IDepartmentFilteringService departmentFilteringService,
+            IMapper mapper, 
+            ILeaveBalanceManager leaveBalanceManager)
         {
             _userRepository = userRepository;
+            _departmentFilteringService = departmentFilteringService;
             _mapper = mapper;
             _passwordHasher = new PasswordHasher<User>();
             _leaveBalanceManager = leaveBalanceManager;
+        }
+
+        public async Task<UserResponse?> GetUserByIdAsync(Guid id, Guid currentUserId)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null) return null;
+
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
+            
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                var user = await _userRepository.GetByIdAsync(id);
+                return user != null ? _mapper.Map<UserResponse>(user) : null;
+            }
+            else
+            {
+                // Check if the requested user is in accessible users
+                if (!accessibleUserIds.Contains(id))
+                    return null;
+
+                var user = await _userRepository.GetByIdAsync(id);
+                return user != null ? _mapper.Map<UserResponse>(user) : null;
+            }
+        }
+
+        public async Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination, Guid currentUserId)
+        {
+            var currentUser = await _userRepository.GetUserWithRolesAsync(currentUserId);
+            if (currentUser == null)
+                return new PaginatedResult<UserResponse> { Items = new List<UserResponse>() };
+
+            var accessibleUserIds = await _departmentFilteringService.GetAccessibleUserIdsAsync(currentUserId);
+                        
+            // If empty, it means super admin (no filtering)
+            if (!accessibleUserIds.Any())
+            {
+                var users = await _userRepository.GetAllPaginatedAsync(pagination);
+                var responses = _mapper.Map<IEnumerable<UserResponse>>(users.Items).ToList();
+
+                return new PaginatedResult<UserResponse>
+                {
+                    Items = responses,
+                    PageNumber = users.PageNumber,
+                    PageSize = users.PageSize,
+                    TotalRecords = users.TotalRecords
+                };
+            }
+            else
+            {
+                // Filter by accessible users
+                var allUsers = await _userRepository.GetByIdsAsync(accessibleUserIds);
+                var responses = _mapper.Map<IEnumerable<UserResponse>>(allUsers).ToList();
+
+                // Apply pagination manually
+                var totalCount = responses.Count;
+                var items = responses
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToList();
+
+                return new PaginatedResult<UserResponse>
+                {
+                    Items = items,
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRecords = totalCount
+                };
+            }
+        }
+
+        // Keep existing methods for backward compatibility
+        public async Task<UserResponse?> GetUserByIdAsync(Guid id)
+        {
+            return await GetUserByIdAsync(id, Guid.Empty);
+        }
+
+        public async Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination)
+        {
+            return await GetAllUsersPaginatedAsync(pagination, Guid.Empty);
         }
 
         public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
@@ -60,35 +146,10 @@ namespace KmtBackend.BLL.Managers
             return _mapper.Map<UserResponse>(createdUser);
         }
 
-        public async Task<UserResponse?> GetUserByIdAsync(Guid id)
-        {
-            var user = await _userRepository.GetByIdAsync(id);
-            
-            if (user == null) return null;
-            
-            return _mapper.Map<UserResponse>(user);
-        }
-
         public async Task<IEnumerable<UserResponse>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
-            
             return _mapper.Map<IEnumerable<UserResponse>>(users);
-        }
-
-        public async Task<PaginatedResult<UserResponse>> GetAllUsersPaginatedAsync(PaginationQuery pagination)
-        {
-            var roles = await _userRepository.GetAllPaginatedAsync(pagination);
-
-            var responses = _mapper.Map<IEnumerable<UserResponse>>(roles.Items).ToList();
-
-            return new PaginatedResult<UserResponse>
-            {
-                Items = responses,
-                PageNumber = roles.PageNumber,
-                PageSize = roles.PageSize,
-                TotalRecords = roles.TotalRecords
-            };
         }
 
         public async Task<UserResponse> UpdateUserAsync(Guid id, UpdateUserRequest request)
